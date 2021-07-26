@@ -4,6 +4,7 @@ import TopologicalSort from '../utils/TopologicalSort';
 
 class Edge {
     readonly GasConsumption = 40_000;
+    readonly MINIMUM_LIQUIDITY = 1000;
     pool: Pool;
     vert0: Vertice;
     vert1: Vertice;
@@ -56,6 +57,19 @@ class Edge {
         }
 
         return [out, gas];
+    }
+
+    checkMinimalLiquidityExceededAfterSwap(from: Vertice, amountOut: number): boolean {
+        if (from == this.vert0) {
+            if (this.direction)
+                return this.pool.reserve1 - amountOut - this.amountOutPrevious < this.MINIMUM_LIQUIDITY;
+            else
+                return this.pool.reserve1 - amountOut + this.amountOutPrevious < this.MINIMUM_LIQUIDITY;
+        } else
+            if (this.direction)
+                return this.pool.reserve0 - amountOut + this.amountInPrevious < this.MINIMUM_LIQUIDITY;
+            else
+                return this.pool.reserve0 - amountOut - this.amountInPrevious < this.MINIMUM_LIQUIDITY;
     }
 
     applySwap(from: Vertice) {
@@ -200,6 +214,9 @@ class Graph {
                 if (processedVert.has(v2))
                     return;
                 const [newIncome, gas] = e.calcOutput((closestVert as Vertice), (closestVert as Vertice).bestIncome);
+                // TODO: to test !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                if (e.checkMinimalLiquidityExceededAfterSwap((closestVert as Vertice), newIncome))
+                    return;
                 const newGasSpent = (closestVert as Vertice).gasSpent + gas;
                 const price = to.gasPrice/v2.token.gasPrice;
                 const newTotal = newIncome*price - newGasSpent*to.gasPrice;

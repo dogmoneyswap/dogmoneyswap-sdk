@@ -108,7 +108,8 @@ export function calcInByOut(pool:Pool, amountOut: number, direction: boolean): n
         default:
             console.error('Unknown pool type');
     }
-    ASSERT(() => Math.abs(amountOut/calcOutByIn(pool, input, direction)-1) < 1e-6, "Error 138");
+    
+    ASSERT(() => closeValues(amountOut, calcOutByIn(pool, input, direction), 1e-6), "Error 138");
     return input;
 }
 
@@ -171,6 +172,8 @@ export function ASSERT(f: () => boolean, t: string) {
 }
 
 export function closeValues(a: number, b: number, accuracy: number): boolean {
+    if (a == 0 && b == 0)
+        return true;
     return Math.abs(a/b-1) < accuracy;
 }
 
