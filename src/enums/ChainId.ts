@@ -23,4 +23,6 @@ export enum ChainId {
   OKEX = 66,
   OKEX_TESTNET = 65,
   CELO = 42220,
+  PALM = 11297108109,
+  PALM_TESTNET = 11297108099,
 }
