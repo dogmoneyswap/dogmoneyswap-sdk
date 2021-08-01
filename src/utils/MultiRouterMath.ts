@@ -75,9 +75,15 @@ export function calcOutByIn(pool:Pool, amountIn: number, direction = true): numb
             return y*(1-Math.pow(x/(x+actualIn), weightRatio));
         } 
         case PoolType.Hybrid: {
+            // console.log("Typescript params:");
+            // console.log("x, y, in, A", x, y, amountIn*(1-pool.fee), HybridParamsFromData(pool.data));
+            
             const xNew = x + amountIn*(1-pool.fee);
             const yNew = HybridgetY(pool, xNew);
+            //console.log("D, y", HybridComputeLiquidity(pool), yNew);
             const dy = y - yNew;
+            //console.log("out", dy);
+            
             return dy;
         }
     }
@@ -102,7 +108,7 @@ export function calcInByOut(pool:Pool, amountOut: number, direction: boolean): n
         case PoolType.Hybrid: {
             const yNew = y - amountOut;
             const xNew = HybridgetY(pool, yNew);
-            input = (x - xNew)/(1-pool.fee);
+            input = (xNew - x)/(1-pool.fee);
             break;
         }
         default:
