@@ -8,6 +8,7 @@ import {
   Heco,
   Matic,
   Okex,
+  Palm,
   xDai,
 } from '../entities/natives'
 
@@ -36,4 +37,5 @@ export const NATIVE = {
   [ChainId.OKEX]: Okex.onChain(ChainId.OKEX),
   [ChainId.OKEX_TESTNET]: Okex.onChain(ChainId.OKEX_TESTNET),
   [ChainId.CELO]: Celo.onChain(ChainId.CELO),
+  [ChainId.PALM]: Palm.onChain(ChainId.PALM),
 }
