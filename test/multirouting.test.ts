@@ -37,14 +37,12 @@ const testPools = [
     testPool0_1, testPool0_2, testPool1_3, testPool2_3, testPool1_2,
 ];
 
-describe('constants', () => {
-    describe('INIT_CODE_HASH', () => {
-      it('matches computed bytecode hash', () => {
-          const res = findMultiRouting(tokens[0], tokens[3], 10000, testPools);
-          
-          expect(res).toBeDefined();
-          expect(res?.legs.length).toEqual(testPools.length);
-          expect(res?.legs[res.legs.length-1].swapPortion).toEqual(1);
-      })
+describe('Multirouting for bridge topology', () => {
+    it('works correct', () => {
+        const res = findMultiRouting(tokens[0], tokens[3], 10000, testPools);
+        
+        expect(res).toBeDefined();
+        expect(res?.legs.length).toEqual(testPools.length);
+        expect(res?.legs[res.legs.length-1].swapPortion).toEqual(1);
     })
 })

@@ -58,7 +58,7 @@ export function HybridComputeLiquidity(pool: Pool): number {
 export function HybridgetY(pool: Pool, x: number): number {
     const D = HybridComputeLiquidity(pool);
     const A = HybridParamsFromData(pool.data);
-    return calcSquareEquation(16*A*x, 16*A*x*x + 4*D*x - 16*A*D*x, -D*D*D)[1];
+    return calcSquareEquation(8*A*x, 8*A*x*x + 4*D*x - 8*A*D*x, -D*D*D)[1];
 }
 
 export function calcOutByIn(pool:Pool, amountIn: number, direction = true): number {
@@ -75,9 +75,15 @@ export function calcOutByIn(pool:Pool, amountIn: number, direction = true): numb
             return y*(1-Math.pow(x/(x+actualIn), weightRatio));
         } 
         case PoolType.Hybrid: {
-            const xNew = x + amountIn;
+            // console.log("Typescript params:");
+            // console.log("x, y, in, A", x, y, amountIn*(1-pool.fee), HybridParamsFromData(pool.data));
+            
+            const xNew = x + amountIn*(1-pool.fee);
             const yNew = HybridgetY(pool, xNew);
-            const dy = (y - yNew)*(1-pool.fee); // TODO: Why other pools take fees at the beginning, and this one - at the end?
+            //console.log("D, y", HybridComputeLiquidity(pool), yNew);
+            const dy = y - yNew;
+            //console.log("out", dy);
+            
             return dy;
         }
     }
@@ -100,9 +106,9 @@ export function calcInByOut(pool:Pool, amountOut: number, direction: boolean): n
             break;
         } 
         case PoolType.Hybrid: {
-            const yNew = y - amountOut/(1-pool.fee);
+            const yNew = y - amountOut;
             const xNew = HybridgetY(pool, yNew);
-            input = (x - xNew);
+            input = (xNew - x)/(1-pool.fee);
             break;
         }
         default:
