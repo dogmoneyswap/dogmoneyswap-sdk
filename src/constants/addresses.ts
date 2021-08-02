@@ -25,6 +25,8 @@ export const FACTORY_ADDRESS: { [chainId in ChainId]: string } = {
   [ChainId.OKEX]: '0xc35DADB65012eC5796536bD9864eD8773aBc74C4',
   [ChainId.OKEX_TESTNET]: '0xc35DADB65012eC5796536bD9864eD8773aBc74C4',
   [ChainId.CELO]: '0xc35DADB65012eC5796536bD9864eD8773aBc74C4',
+  [ChainId.PALM]: '0xc35DADB65012eC5796536bD9864eD8773aBc74C4',
+  [ChainId.PALM_TESTNET]: '',
 }
 
 export const ROUTER_ADDRESS: { [chainId in ChainId]: string } = {
@@ -52,6 +54,8 @@ export const ROUTER_ADDRESS: { [chainId in ChainId]: string } = {
   [ChainId.OKEX]: '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506',
   [ChainId.OKEX_TESTNET]: '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506',
   [ChainId.CELO]: '0x1421bDe4B10e8dd459b3BCb598810B1337D56842',
+  [ChainId.PALM]: '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506',
+  [ChainId.PALM_TESTNET]: '',
 }
 
 export const SUSHI_ADDRESS: { [chainId in ChainId]: string } = {
@@ -79,6 +83,8 @@ export const SUSHI_ADDRESS: { [chainId in ChainId]: string } = {
   [ChainId.OKEX]: '0x2218E0D5E0173769F5b4939a3aE423f7e5E4EAB7',
   [ChainId.OKEX_TESTNET]: '',
   [ChainId.CELO]: '',
+  [ChainId.PALM]: '',
+  [ChainId.PALM_TESTNET]: '',
 }
 
 export const MASTERCHEF_ADDRESS: { [chainId in ChainId]: string } = {
@@ -106,6 +112,8 @@ export const MASTERCHEF_ADDRESS: { [chainId in ChainId]: string } = {
   [ChainId.OKEX]: '',
   [ChainId.OKEX_TESTNET]: '',
   [ChainId.CELO]: '',
+  [ChainId.PALM]: '',
+  [ChainId.PALM_TESTNET]: '',
 }
 
 export const BAR_ADDRESS: { [chainId in ChainId]: string } = {
@@ -133,6 +141,8 @@ export const BAR_ADDRESS: { [chainId in ChainId]: string } = {
   [ChainId.OKEX]: '',
   [ChainId.OKEX_TESTNET]: '',
   [ChainId.CELO]: '',
+  [ChainId.PALM]: '',
+  [ChainId.PALM_TESTNET]: '',
 }
 
 export const MAKER_ADDRESS: { [chainId in ChainId]: string } = {
@@ -160,6 +170,8 @@ export const MAKER_ADDRESS: { [chainId in ChainId]: string } = {
   [ChainId.OKEX]: '',
   [ChainId.OKEX_TESTNET]: '',
   [ChainId.CELO]: '',
+  [ChainId.PALM]: '',
+  [ChainId.PALM_TESTNET]: '',
 }
 
 export const TIMELOCK_ADDRESS: { [chainId in ChainId]: string } = {
@@ -187,6 +199,8 @@ export const TIMELOCK_ADDRESS: { [chainId in ChainId]: string } = {
   [ChainId.OKEX]: '',
   [ChainId.OKEX_TESTNET]: '',
   [ChainId.CELO]: '',
+  [ChainId.PALM]: '',
+  [ChainId.PALM_TESTNET]: '',
 }
 
 export const BENTOBOX_ADDRESS: {
@@ -216,6 +230,8 @@ export const BENTOBOX_ADDRESS: {
   [ChainId.OKEX]: '',
   [ChainId.OKEX_TESTNET]: '',
   [ChainId.CELO]: '',
+  [ChainId.PALM]: '',
+  [ChainId.PALM_TESTNET]: '',
 }
 
 export const KASHI_ADDRESS: {
@@ -245,6 +261,8 @@ export const KASHI_ADDRESS: {
   [ChainId.OKEX]: '',
   [ChainId.OKEX_TESTNET]: '',
   [ChainId.CELO]: '',
+  [ChainId.PALM]: '',
+  [ChainId.PALM_TESTNET]: '',
 }
 
 // export const KASHI_ADDRESS = '0x2cBA6Ab6574646Badc84F0544d05059e57a5dc42'
@@ -276,6 +294,8 @@ export const SUSHISWAP_SWAPPER_ADDRESS: {
   [ChainId.OKEX]: '',
   [ChainId.OKEX_TESTNET]: '',
   [ChainId.CELO]: '',
+  [ChainId.PALM]: '',
+  [ChainId.PALM_TESTNET]: '',
 }
 
 export const SUSHISWAP_MULTISWAPPER_ADDRESS: {
@@ -305,6 +325,8 @@ export const SUSHISWAP_MULTISWAPPER_ADDRESS: {
   [ChainId.OKEX]: '',
   [ChainId.OKEX_TESTNET]: '',
   [ChainId.CELO]: '',
+  [ChainId.PALM]: '',
+  [ChainId.PALM_TESTNET]: '',
 }
 
 export const SUSHISWAP_MULTI_EXACT_SWAPPER_ADDRESS = {
@@ -332,6 +354,8 @@ export const SUSHISWAP_MULTI_EXACT_SWAPPER_ADDRESS = {
   [ChainId.OKEX]: '',
   [ChainId.OKEX_TESTNET]: '',
   [ChainId.CELO]: '',
+  [ChainId.PALM]: '',
+  [ChainId.PALM_TESTNET]: '',
 }
 
 export const PEGGED_ORACLE_ADDRESS =
@@ -371,4 +395,6 @@ export const BORING_HELPER_ADDRESS = {
   [ChainId.OKEX]: '',
   [ChainId.OKEX_TESTNET]: '',
   [ChainId.CELO]: '',
+  [ChainId.PALM]: '',
+  [ChainId.PALM_TESTNET]: '',
 }

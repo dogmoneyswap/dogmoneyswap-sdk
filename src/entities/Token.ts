@@ -318,4 +318,11 @@ export const WNATIVE: { [chainId: number]: Token } = {
     'CELO',
     'Celo'
   ),
+  [ChainId.PALM]: new Token(
+    ChainId.PALM,
+    '0xF98cABF0a963452C5536330408B2590567611a71',
+    18,
+    'WPALM',
+    'Wrapped Palm'
+  ),
 }
