@@ -1,4 +1,4 @@
-
+import {BigNumber} from '@ethersproject/bignumber'
 export interface RToken {
     name: string;
     gasPrice: number;
@@ -17,6 +17,8 @@ export interface Pool {
     type: PoolType;
     reserve0: number;
     reserve1: number;
+    reserve0BN?: BigNumber;
+    reserve1BN?: BigNumber;
     data: ArrayBuffer;
     fee: number;
 }

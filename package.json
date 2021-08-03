@@ -23,6 +23,7 @@
     "prepublishOnly": "tsdx build"
   },
   "dependencies": {
+    "@ethersproject/bignumber": "^5.4.1",
     "@sushiswap/core": "^2.0.0-canary.0",
     "big.js": "^5.2.2",
     "decimal.js-light": "^2.5.0",

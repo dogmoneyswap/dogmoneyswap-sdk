@@ -1,3 +1,4 @@
+import {BigNumber} from '@ethersproject/bignumber'
 import { Pool, PoolType } from "../types/MultiRouterTypes"
 
 
@@ -55,6 +56,60 @@ export function HybridComputeLiquidity(pool: Pool): number {
     return D;
 }
 
+const DCacheBN = new Map<Pool, BigNumber>();
+export function HybridComputeLiquidityBN(pool: Pool): BigNumber {
+    const res = DCacheBN.get(pool);
+    if (res != undefined)
+        return res;
+  
+    const r0 = getBigNumber(pool.reserve0BN, pool.reserve0);
+    const r1 = getBigNumber(pool.reserve1BN, pool.reserve1);
+
+    if (r0.isZero() && r1.isZero()) {
+        DCacheBN.set(pool, BigNumber.from(0));
+        return BigNumber.from(0);
+    }
+    const s = r0.add(r1);
+
+    const A = HybridParamsFromData(pool.data);
+    const nA = BigNumber.from(A * 2);
+
+    let prevD;
+
+    let D = s;
+    for (let i = 0; i < 256; i++) {
+        const dP = D.mul(D).div(r0).mul(D).div(r1).div(4);
+        prevD = D;
+        D = nA.mul(s).add(dP.mul(2)).mul(D).div(nA.sub(1).mul(D).add(dP.mul(3)));
+        if ( D.sub(prevD).abs().lte(1) ) {
+            break;
+        }
+    }
+    DCacheBN.set(pool, D);
+    return D;
+}
+
+export function HybridgetYBN(pool: Pool, x: BigNumber): BigNumber {
+    const D = HybridComputeLiquidityBN(pool);
+    
+    const nA = HybridParamsFromData(pool.data)*2;
+
+    let c = D.mul(D).div(x.mul(2)).mul(D).div(nA*2);
+    let b = D.div(nA).add(x);
+    
+    let yPrev;
+    let y = D;
+    for (let i = 0; i < 256; i++) {
+        yPrev = y;
+        
+        y = y.mul(y).add(c).div(y.mul(2).add(b).sub(D));
+        if (y.sub(yPrev).abs().lte(1)) {
+            break;
+        }
+    }
+    return y;
+}
+
 export function HybridgetY(pool: Pool, x: number): number {
     const D = HybridComputeLiquidity(pool);
     const A = HybridParamsFromData(pool.data);
@@ -75,14 +130,16 @@ export function calcOutByIn(pool:Pool, amountIn: number, direction = true): numb
             return y*(1-Math.pow(x/(x+actualIn), weightRatio));
         } 
         case PoolType.Hybrid: {
-            // console.log("Typescript params:");
-            // console.log("x, y, in, A", x, y, amountIn*(1-pool.fee), HybridParamsFromData(pool.data));
+            // const xNew = x + amountIn*(1-pool.fee);
+            // const yNew = HybridgetY(pool, xNew);
+            // const dy = y - yNew;
             
-            const xNew = x + amountIn*(1-pool.fee);
-            const yNew = HybridgetY(pool, xNew);
-            //console.log("D, y", HybridComputeLiquidity(pool), yNew);
-            const dy = y - yNew;
-            //console.log("out", dy);
+            const xBN = getBigNumber(direction ? pool.reserve0BN : pool.reserve1BN, x);
+            const yBN = getBigNumber(direction ? pool.reserve1BN : pool.reserve0BN, y);
+            const xNewBN = xBN.add(getBigNumber(undefined, amountIn*(1-pool.fee)));
+            const yNewBN = HybridgetYBN(pool, xNewBN);
+            
+            const dy = parseInt(yBN.sub(yNewBN).toString());
             
             return dy;
         }
@@ -106,9 +163,16 @@ export function calcInByOut(pool:Pool, amountOut: number, direction: boolean): n
             break;
         } 
         case PoolType.Hybrid: {
-            const yNew = y - amountOut;
-            const xNew = HybridgetY(pool, yNew);
-            input = (xNew - x)/(1-pool.fee);
+            const xBN = getBigNumber(direction ? pool.reserve0BN : pool.reserve1BN, x);
+            const yBN = getBigNumber(direction ? pool.reserve1BN : pool.reserve0BN, y);
+
+            const yNewBN = yBN.sub(getBigNumber(undefined, amountOut));
+            const xNewBN = HybridgetYBN(pool, yNewBN);
+            input = Math.round(parseInt(xNewBN.sub(xBN).toString())/(1-pool.fee));
+
+            // const yNew = y - amountOut;
+            // const xNew = HybridgetY(pool, yNew);
+            // input = (xNew - x)/(1-pool.fee);
             break;
         }
         default:
@@ -221,4 +285,19 @@ export function revertPositive(f: (x:number)=>number, out: number, hint = 1) {
     } catch (e) {
         return 0;
     }
+}
+
+function getBigNumber(valueBN: BigNumber | undefined, value: number): BigNumber {
+    if (valueBN !== undefined)
+        return valueBN;
+
+    if (value < Number.MAX_SAFE_INTEGER)
+        return BigNumber.from(Math.round(value));
+
+    const exp = Math.floor(Math.log(value)/Math.LN2);
+    console.assert(exp >= 51, 'Internal Error 314');
+    const shift = exp - 51;
+    const mant = Math.round(value/Math.pow(2, shift));
+    const res = BigNumber.from(mant).mul(BigNumber.from(2).pow(shift));
+    return res;
 }
