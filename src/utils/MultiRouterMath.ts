@@ -243,8 +243,10 @@ export function ASSERT(f: () => boolean, t: string) {
 }
 
 export function closeValues(a: number, b: number, accuracy: number): boolean {
-    if (a == 0 && b == 0)
-        return true;
+    if (accuracy == 0)
+        return a == b;
+    if (a < 1/accuracy)
+        return Math.abs(a-b) <= 2;
     return Math.abs(a/b-1) < accuracy;
 }
 
