@@ -1,6 +1,7 @@
 import {BigNumber} from '@ethersproject/bignumber'
 import { Pool, PoolType } from "../types/MultiRouterTypes"
 
+const A_PRECISION = 100;
 
 export function ConstantMeanParamsFromData(data: ArrayBuffer): [number, number] {
     const arr = new Uint8Array(data);
@@ -39,7 +40,7 @@ export function HybridComputeLiquidity(pool: Pool): number {
         return 0;
     }
 
-    const A = HybridParamsFromData(pool.data);
+    const A = HybridParamsFromData(pool.data)/A_PRECISION;
     const nA = A * 2;
 
     let prevD;
@@ -80,7 +81,7 @@ export function HybridComputeLiquidityBN(pool: Pool): BigNumber {
     for (let i = 0; i < 256; i++) {
         const dP = D.mul(D).div(r0).mul(D).div(r1).div(4);
         prevD = D;
-        D = nA.mul(s).add(dP.mul(2)).mul(D).div(nA.sub(1).mul(D).add(dP.mul(3)));
+        D = nA.mul(s).div(A_PRECISION).add(dP.mul(2)).mul(D).div(nA.div(A_PRECISION).sub(1).mul(D).add(dP.mul(3)));
         if ( D.sub(prevD).abs().lte(1) ) {
             break;
         }
@@ -94,8 +95,8 @@ export function HybridgetYBN(pool: Pool, x: BigNumber): BigNumber {
     
     const nA = HybridParamsFromData(pool.data)*2;
 
-    let c = D.mul(D).div(x.mul(2)).mul(D).div(nA*2);
-    let b = D.div(nA).add(x);
+    let c = D.mul(D).div(x.mul(2)).mul(D).div(nA*2/A_PRECISION);
+    let b = D.mul(A_PRECISION).div(nA).add(x);
     
     let yPrev;
     let y = D;
@@ -167,7 +168,7 @@ export function calcInByOut(pool:Pool, amountOut: number, direction: boolean): n
             const yBN = getBigNumber(direction ? pool.reserve1BN : pool.reserve0BN, y);
 
             const yNewBN = yBN.sub(getBigNumber(undefined, amountOut));
-            const xNewBN = HybridgetYBN(pool, yNewBN);
+            const xNewBN = HybridgetYBN(pool, yNewBN);            
             input = Math.round(parseInt(xNewBN.sub(xBN).toString())/(1-pool.fee));
 
             // const yNew = y - amountOut;
@@ -287,7 +288,7 @@ export function revertPositive(f: (x:number)=>number, out: number, hint = 1) {
     }
 }
 
-function getBigNumber(valueBN: BigNumber | undefined, value: number): BigNumber {
+export function getBigNumber(valueBN: BigNumber | undefined, value: number): BigNumber {
     if (valueBN !== undefined)
         return valueBN;
 
