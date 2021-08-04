@@ -147,7 +147,13 @@ export function calcInByOut(pool:Pool, amountOut: number, direction: boolean): n
             console.error('Unknown pool type');
     }
     
-    ASSERT(() => closeValues(amountOut, calcOutByIn(pool, input, direction), 1e-6), "Error 138");
+    ASSERT(() => {
+        const amount2 = calcOutByIn(pool, input, direction);
+        const res = closeValues(amountOut, amount2, 1e-6);
+        if (!res)
+            console.log('Error 138:', amountOut, amount2);
+        return res;
+    });
     return input;
 }
 
@@ -210,8 +216,8 @@ export function calcInputByPrice(pool: Pool, priceEffective: number, hint = 1): 
 
 //====================== Utils ========================
 
-export function ASSERT(f: () => boolean, t: string) {
-    if (!f())
+export function ASSERT(f: () => boolean, t?: string) {
+    if (!f() && t)
         console.error(t);
 }
 
@@ -219,7 +225,7 @@ export function closeValues(a: number, b: number, accuracy: number): boolean {
     if (accuracy == 0)
         return a == b;
     if (a < 1/accuracy)
-        return Math.abs(a-b) <= 2;
+        return Math.abs(a-b) <= 10;
     return Math.abs(a/b-1) < accuracy;
 }
 
