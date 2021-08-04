@@ -28,43 +28,14 @@ export function HybridDataFromParams(A: number): ArrayBuffer {
     return data;
 }
 
-const DCache = new Map<Pool, number>();
-export function HybridComputeLiquidity(pool: Pool): number {
-    const res = DCache.get(pool);
-    if (res != undefined)
-        return res;
-
-    const s = pool.reserve0 + pool.reserve1;
-    if (s == 0) {
-        DCache.set(pool, 0);
-        return 0;
-    }
-
-    const A = HybridParamsFromData(pool.data)/A_PRECISION;
-    const nA = A * 2;
-
-    let prevD;
-    let D = s;
-    for (let i = 0; i < 256; i++) {
-        const dP = D*D*D / (pool.reserve0 * pool.reserve1 * 4);
-        prevD = D;
-        D = (nA*s + dP * 2)*D/((nA - 1)*D + dP * 3);
-        if ( (D - prevD) <= 1 ) {
-            break;
-        }
-    }
-    DCache.set(pool, D);
-    return D;
-}
-
 const DCacheBN = new Map<Pool, BigNumber>();
 export function HybridComputeLiquidityBN(pool: Pool): BigNumber {
     const res = DCacheBN.get(pool);
     if (res != undefined)
         return res;
   
-    const r0 = getBigNumber(pool.reserve0BN, pool.reserve0);
-    const r1 = getBigNumber(pool.reserve1BN, pool.reserve1);
+    const r0 = pool.reserve0;
+    const r1 = pool.reserve1;
 
     if (r0.isZero() && r1.isZero()) {
         DCacheBN.set(pool, BigNumber.from(0));
@@ -111,20 +82,18 @@ export function HybridgetYBN(pool: Pool, x: BigNumber): BigNumber {
     return y;
 }
 
-export function HybridgetY(pool: Pool, x: number): number {
-    const D = HybridComputeLiquidity(pool);
-    const A = HybridParamsFromData(pool.data);
-    return calcSquareEquation(8*A*x, 8*A*x*x + 4*D*x - 8*A*D*x, -D*D*D)[1];
-}
-
 export function calcOutByIn(pool:Pool, amountIn: number, direction = true): number {
-    const x = direction ? pool.reserve0 : pool.reserve1;
-    const y = direction ? pool.reserve1 : pool.reserve0;
+    const xBN = direction ? pool.reserve0 : pool.reserve1;
+    const yBN = direction ? pool.reserve1 : pool.reserve0;
     switch(pool.type) {
         case PoolType.ConstantProduct: {
+            const x = parseInt(xBN.toString());
+            const y = parseInt(yBN.toString());
             return y*amountIn/(x/(1-pool.fee) + amountIn);
         } 
         case PoolType.ConstantMean: {
+            const x = parseInt(xBN.toString());
+            const y = parseInt(yBN.toString());
             const [weight0, weight1] = ConstantMeanParamsFromData(pool.data);
             const weightRatio = direction ? weight0/weight1 : weight1/weight0;
             const actualIn = amountIn*(1-pool.fee);
@@ -135,11 +104,8 @@ export function calcOutByIn(pool:Pool, amountIn: number, direction = true): numb
             // const yNew = HybridgetY(pool, xNew);
             // const dy = y - yNew;
             
-            const xBN = getBigNumber(direction ? pool.reserve0BN : pool.reserve1BN, x);
-            const yBN = getBigNumber(direction ? pool.reserve1BN : pool.reserve0BN, y);
             const xNewBN = xBN.add(getBigNumber(undefined, amountIn*(1-pool.fee)));
             const yNewBN = HybridgetYBN(pool, xNewBN);
-            
             const dy = parseInt(yBN.sub(yNewBN).toString());
             
             return dy;
@@ -150,23 +116,24 @@ export function calcOutByIn(pool:Pool, amountIn: number, direction = true): numb
 
 export function calcInByOut(pool:Pool, amountOut: number, direction: boolean): number {
     let input = 0;
-    const x = direction ? pool.reserve0 : pool.reserve1;
-    const y = direction ? pool.reserve1 : pool.reserve0;
+    const xBN = direction ? pool.reserve0 : pool.reserve1;
+    const yBN = direction ? pool.reserve1 : pool.reserve0;
     switch(pool.type) {
         case PoolType.ConstantProduct: {
+            const x = parseInt(xBN.toString());
+            const y = parseInt(yBN.toString());
             input = x*amountOut/(1-pool.fee)/(y - amountOut);
             break;
         } 
         case PoolType.ConstantMean: {
+            const x = parseInt(xBN.toString());
+            const y = parseInt(yBN.toString());
             const [weight0, weight1] = ConstantMeanParamsFromData(pool.data);
             const weightRatio = direction ? weight1/weight0 : weight1/weight0;
             input = x*(1-pool.fee)*(Math.pow(1-amountOut/y, -weightRatio) - 1);
             break;
         } 
         case PoolType.Hybrid: {
-            const xBN = getBigNumber(direction ? pool.reserve0BN : pool.reserve1BN, x);
-            const yBN = getBigNumber(direction ? pool.reserve1BN : pool.reserve0BN, y);
-
             const yNewBN = yBN.sub(getBigNumber(undefined, amountOut));
             const xNewBN = HybridgetYBN(pool, yNewBN);            
             input = Math.round(parseInt(xNewBN.sub(xBN).toString())/(1-pool.fee));
@@ -185,21 +152,23 @@ export function calcInByOut(pool:Pool, amountOut: number, direction: boolean): n
 }
 
 export function calcPrice(pool:Pool, amountIn: number): number {
+    const r0 = parseInt(pool.reserve0.toString());
+    const r1 = parseInt(pool.reserve1.toString());
     switch(pool.type) {
         case PoolType.ConstantProduct: {
-            const x = pool.reserve0/(1-pool.fee);
-            return pool.reserve1*x/(x+amountIn)/(x+amountIn);
+            const x = r0/(1-pool.fee);
+            return r1*x/(x+amountIn)/(x+amountIn);
         } 
         case PoolType.ConstantMean: {
             const [weight0, weight1] = ConstantMeanParamsFromData(pool.data);
             const weightRatio = weight0/weight1;
-            const x = pool.reserve0+amountIn*(1-pool.fee);
-            return pool.reserve1*weightRatio*(1-pool.fee)*Math.pow(pool.reserve0/x, weightRatio)/x;
+            const x = r0+amountIn*(1-pool.fee);
+            return r1*weightRatio*(1-pool.fee)*Math.pow(r0/x, weightRatio)/x;
         } 
         case PoolType.Hybrid: {
-            const D = HybridComputeLiquidity(pool);
-            const A = HybridParamsFromData(pool.data);
-            const x = pool.reserve0 + amountIn;
+            const D = parseInt(HybridComputeLiquidityBN(pool).toString());
+            const A = HybridParamsFromData(pool.data)/A_PRECISION;
+            const x = r0 + amountIn;
             const b = 4*A*x + D - 4*A*D;
             const ac4 = D*D*D/x;
             const Ds = Math.sqrt(b*b + 4*A*ac4);
@@ -211,17 +180,21 @@ export function calcPrice(pool:Pool, amountIn: number): number {
 }
 
 function calcInputByPriceConstantMean(pool:Pool, price:number) {
+    const r0 = parseInt(pool.reserve0.toString());
+    const r1 = parseInt(pool.reserve1.toString());
     const w = ConstantMeanParamsFromData(pool.data);
     const weightRatio = w[0]/w[1];
-    const t = pool.reserve1*price*weightRatio*(1-pool.fee)*Math.pow(pool.reserve0, weightRatio);
-    return (Math.pow(t, 1/(weightRatio+1)) - pool.reserve0)/(1-pool.fee);
+    const t = r1*price*weightRatio*(1-pool.fee)*Math.pow(r0, weightRatio);
+    return (Math.pow(t, 1/(weightRatio+1)) - r0)/(1-pool.fee);
 }
 
 export function calcInputByPrice(pool: Pool, priceEffective: number, hint = 1): number {
     switch(pool.type) {
         case PoolType.ConstantProduct: {
-            const x = pool.reserve0/(1-pool.fee);
-            const res =  Math.sqrt(pool.reserve1*x*priceEffective) - x;
+            const r0 = parseInt(pool.reserve0.toString());
+            const r1 = parseInt(pool.reserve1.toString());
+            const x = r0/(1-pool.fee);
+            const res =  Math.sqrt(r1*x*priceEffective) - x;
             return res;
         } 
         case PoolType.ConstantMean: {
