@@ -4,9 +4,10 @@ import { ChainId } from './enums';
 import { getSignatureWithProvider, getSignature, Message, getTypedData, getTypeHash } from './entities'
 import { LAMBDA_URL, STOP_LIMIT_ORDER } from './constants';
 import { ethers, BigNumber, utils, Contract, Transaction } from 'ethers';
-import axios from "axios";
 import { NonceManager } from "@ethersproject/experimental";
 import abi from './abis/StopLimitOrder.json';
+import fetch from 'isomorphic-unfetch'
+
 
 export interface ILimitOrderData {
     maker: string;
@@ -215,29 +216,32 @@ export class LimitOrder {
     }
 
     async send() {
-        const resp = await axios.post(`${LAMBDA_URL}/orders/create`, {
-            maker: this.maker,
-            tokenIn: this.tokenInAddress,
-            tokenOut: this.tokenOutAddress,
-            tokenInDecimals: this.tokenInDecimals,
-            tokenOutDecimals: this.tokenOutDecimals,
-            tokenInSymbol: this.tokenInSymbol,
-            tokenOutSymbol: this.tokenOutSymbol,
-            amountIn: this.amountInRaw,
-            amountOut: this.amountOutRaw,
-            recipient: this.recipient,
-            startTime: this.startTime,
-            endTime: this.endTime,
-            stopPrice: this.stopPrice,
-            oracleAddress: this.oracleAddress,
-            oracleData: this.oracleData,
-            v: this.v,
-            r: this.r,
-            s: this.s,
-            chainId: this.amountIn.currency.chainId
+        const resp = await fetch(`${LAMBDA_URL}/orders/create`, {
+            method: 'POST',
+            body: JSON.stringify( {
+                maker: this.maker,
+                tokenIn: this.tokenInAddress,
+                tokenOut: this.tokenOutAddress,
+                tokenInDecimals: this.tokenInDecimals,
+                tokenOutDecimals: this.tokenOutDecimals,
+                tokenInSymbol: this.tokenInSymbol,
+                tokenOutSymbol: this.tokenOutSymbol,
+                amountIn: this.amountInRaw,
+                amountOut: this.amountOutRaw,
+                recipient: this.recipient,
+                startTime: this.startTime,
+                endTime: this.endTime,
+                stopPrice: this.stopPrice,
+                oracleAddress: this.oracleAddress,
+                oracleData: this.oracleData,
+                v: this.v,
+                r: this.r,
+                s: this.s,
+                chainId: this.amountIn.currency.chainId
+            })
         });
 
-        return resp.data;
+        return resp.json();
     }
 }
 

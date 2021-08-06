@@ -28,11 +28,8 @@ describe('Limit Order', () => {
         expect(r).toEqual("0x711b4c27016d790b188e5cef55e9468aabb51fbdaa37900ce5cc0b6fe7386678");
         expect(s).toEqual("0x285e2469a47086ab79a152125337297579c23faca9c30ab60237430e99357677");
 
-        try {
-            await limitOrder.send();
-        } catch (e) {
-            expect(e.response.data.data).toEqual("Duplicate Order");
-        }
+        let data = await limitOrder.send();
+        expect(data.data).toEqual("Duplicate Order");
 
     }, 10000)
 
