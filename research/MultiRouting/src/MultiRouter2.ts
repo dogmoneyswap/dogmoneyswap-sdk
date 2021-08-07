@@ -43,8 +43,8 @@ export class MultiRouterConstantMean extends MultiRouter {
 
     constructor(_pool: Pool) {
         super();
-        console.assert(_pool.type == PoolType.ConstantMean, 
-            "Wrong pool type " + _pool.type + " != " + PoolType.ConstantMean);
+        console.assert(_pool.type == PoolType.Weighted, 
+            "Wrong pool type " + _pool.type + " != " + PoolType.Weighted);
         this.pool = _pool;
     }
 

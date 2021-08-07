@@ -42,7 +42,7 @@ const testPool3 = {
     token0: T1,
     token1: T2,
     address: "pool3",
-    type: PoolType.ConstantMean,
+    type: PoolType.Weighted,
     reserve0: 2*weight0*price1In0*reserve[2]/(weight0*price1In0 + weight1),
     reserve1: 2*weight1*reserve[2]/(weight0*price1In0 + weight1),
     data: ConstantMeanDataFromParams(weight0, weight1),

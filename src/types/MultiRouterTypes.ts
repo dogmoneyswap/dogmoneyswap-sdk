@@ -7,7 +7,7 @@ export interface RToken {
 
 export enum PoolType {
     ConstantProduct = 'ConstantProduct',
-    ConstantMean = 'ConstantMean',
+    Weighted = 'Weighted',
     Hybrid = 'Hybrid'
 }
 

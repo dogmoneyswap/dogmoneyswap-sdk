@@ -91,7 +91,7 @@ export function calcOutByIn(pool:Pool, amountIn: number, direction = true): numb
             const y = parseInt(yBN.toString());
             return y*amountIn/(x/(1-pool.fee) + amountIn);
         } 
-        case PoolType.ConstantMean: {
+        case PoolType.Weighted: {
             const x = parseInt(xBN.toString());
             const y = parseInt(yBN.toString());
             const [weight0, weight1] = ConstantMeanParamsFromData(pool.data);
@@ -125,7 +125,7 @@ export function calcInByOut(pool:Pool, amountOut: number, direction: boolean): n
             input = x*amountOut/(1-pool.fee)/(y - amountOut);
             break;
         } 
-        case PoolType.ConstantMean: {
+        case PoolType.Weighted: {
             const x = parseInt(xBN.toString());
             const y = parseInt(yBN.toString());
             const [weight0, weight1] = ConstantMeanParamsFromData(pool.data);
@@ -165,7 +165,7 @@ export function calcPrice(pool:Pool, amountIn: number): number {
             const x = r0/(1-pool.fee);
             return r1*x/(x+amountIn)/(x+amountIn);
         } 
-        case PoolType.ConstantMean: {
+        case PoolType.Weighted: {
             const [weight0, weight1] = ConstantMeanParamsFromData(pool.data);
             const weightRatio = weight0/weight1;
             const x = r0+amountIn*(1-pool.fee);
@@ -203,7 +203,7 @@ export function calcInputByPrice(pool: Pool, priceEffective: number, hint = 1): 
             const res =  Math.sqrt(r1*x*priceEffective) - x;
             return res;
         } 
-        case PoolType.ConstantMean: {
+        case PoolType.Weighted: {
             const res = calcInputByPriceConstantMean(pool, priceEffective);
             return res;
         } 
