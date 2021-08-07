@@ -1,5 +1,5 @@
 import {BigNumber} from '@ethersproject/bignumber'
-import { PoolType } from '../src/types/MultiRouterTypes';
+import { ConstantProductPool } from '../src/types/MultiRouterTypes';
 import {findMultiRouting} from '../src/entities/MultiRouter'
 const gasPrice = 1*200*1e-9;
 
@@ -15,16 +15,14 @@ const tokens = price.map((p, i) => ({
 }));
 
 function getPool(t0: number, t1: number, reserve: number, fee=0.003, imbalance = 0) {
-    return {
+    return new ConstantProductPool({
         token0: tokens[t0],
         token1: tokens[t1],
         address: `pool-${t0}-${t1}-${reserve}-${fee}`,
-        type: PoolType.ConstantProduct,
         reserve0: BigNumber.from(reserve),
         reserve1: BigNumber.from(Math.round(reserve/(price[t1]/price[t0]) - imbalance)),
-        data: new ArrayBuffer(16),
         fee
-    };
+    });
 }
 
 const testPool0_1 = getPool(0, 1, 1_000_000);
