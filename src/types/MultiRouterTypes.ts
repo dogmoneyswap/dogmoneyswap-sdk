@@ -2,7 +2,7 @@ import {BigNumber} from '@ethersproject/bignumber'
 
 export interface RToken {
     name: string;
-    gasPrice: number;
+    address: string;
 }
 
 export enum PoolType {

@@ -8,10 +8,10 @@ const gasPrice = 1*200*1e-9;
 // -0 | 3-
 //   \2/
 
-const price = [1,1,1,1];
-const tokens = price.map((p, i) => ({
+const price = [1,1,1,1, 1];
+const tokens = price.map((_, i) => ({
     name: '' + (i+1),
-    gasPrice: gasPrice/p
+    address: "abcd"
 }));
 
 function getPool(t0: number, t1: number, reserve: number, fee=0.003, imbalance = 0) {
@@ -37,7 +37,15 @@ const testPools = [
 
 describe('Multirouting for bridge topology', () => {
     it('works correct', () => {
-        const res = findMultiRouting(tokens[0], tokens[3], 10000, testPools);
+        const res = findMultiRouting(tokens[0], tokens[3], 10000, testPools, tokens[2], gasPrice);
+        
+        expect(res).toBeDefined();
+        expect(res?.legs.length).toEqual(testPools.length);
+        expect(res?.legs[res.legs.length-1].swapPortion).toEqual(1);
+    })
+
+    it('unknown gas price', () => {
+        const res = findMultiRouting(tokens[0], tokens[3], 20000, testPools, tokens[4], gasPrice);
         
         expect(res).toBeDefined();
         expect(res?.legs.length).toEqual(testPools.length);
