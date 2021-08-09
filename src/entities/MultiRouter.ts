@@ -1,5 +1,5 @@
 import {Pool, RToken, RouteLeg, MultiRoute} from '../types/MultiRouterTypes'
-import { ASSERT, calcInByOut, calcOutByIn, closeValues } from '../utils/MultiRouterMath';
+import { ASSERT, calcInByOut, calcOutByIn, closeValues, calcPrice } from '../utils/MultiRouterMath';
 import TopologicalSort from '../utils/TopologicalSort';
 
 class Edge {
@@ -37,13 +37,13 @@ class Edge {
                     gas = -this.GasConsumption;
             } else {
                 out = calcOutByIn(pool, this.amountOutPrevious + amountIn, false) - this.amountInPrevious;
-                const price = this.pool.token1.gasPrice/this.pool.token0.gasPrice;
+                const price = this.vert1.price/this.vert0.price;
                 console.assert(out < amountIn/price && out >= 0);
             }
         } else {
             if (this.direction) {
                 out = calcOutByIn(pool, this.amountInPrevious + amountIn, true) - this.amountOutPrevious;
-                const price = this.pool.token1.gasPrice/this.pool.token0.gasPrice;
+                const price = this.vert1.price/this.vert0.price;
                 console.assert(out < amountIn*price && out >= 0);
             } else {
                 if (amountIn == this.amountOutPrevious) // TODO: accuracy?
@@ -114,6 +114,9 @@ class Vertice {
     token: RToken;
     edges: Edge[];
 
+    price: number;
+    gasPrice: number;
+
     bestIncome: number;    // temp data used for findBestPath algorithm
     gasSpent: number;      // temp data used for findBestPath algorithm
     bestTotal: number;     // temp data used for findBestPath algorithm
@@ -122,6 +125,8 @@ class Vertice {
     constructor(t:RToken) {
         this.token = t;
         this.edges = [];
+        this.price = 0;
+        this.gasPrice = 0;
         this.bestIncome = 0;
         this.gasSpent = 0;
         this.bestTotal = 0;
@@ -140,7 +145,7 @@ class Graph {
     edges: Edge[];
     tokens: Map<RToken, Vertice>;
 
-    constructor(pools: Pool[]) {
+    constructor(pools: Pool[], baseToken: RToken, gasPrice: number) {
         this.vertices = [];
         this.edges = [];
         this.tokens = new Map();
@@ -151,6 +156,26 @@ class Graph {
             v0.edges.push(edge);
             v1.edges.push(edge);
             this.edges.push(edge);
+        })
+        const baseVert = this.tokens.get(baseToken);
+        if (baseVert) {
+            this.setPrices(baseVert, 1, gasPrice);
+        }
+    }
+
+    setPrices(from: Vertice, price: number, gasPrice: number) {
+        if (from.price !== 0)
+            return;
+        from.price = price;
+        from.gasPrice = gasPrice;
+        from.edges.forEach(e => {
+            const v = e.vert0 == from ? e.vert1 : e.vert0;
+            if (v.price !== 0)
+                return;
+            let p = calcPrice(e.pool, 0);
+            if (from == e.vert1)
+                p = 1/p;
+            this.setPrices(v, price*p, gasPrice*p);
         })
     }
 
@@ -223,8 +248,8 @@ class Graph {
                 if (e.checkMinimalLiquidityExceededAfterSwap((closestVert as Vertice), newIncome))
                     return;
                 const newGasSpent = (closestVert as Vertice).gasSpent + gas;
-                const price = to.gasPrice/v2.token.gasPrice;
-                const newTotal = newIncome*price - newGasSpent*to.gasPrice;
+                const price = finish.price/v2.price;
+                const newTotal = newIncome*price - newGasSpent*finish.gasPrice;
                 //console.log(newIncome, gas, newTotal);
                 
                 if (!v2.bestSource)
@@ -344,8 +369,19 @@ class Graph {
     }
 }
 
-export function findMultiRouting(from: RToken, to: RToken, amountIn: number, pools: Pool[]): MultiRoute | undefined {
-    const g = new Graph(pools);
+export function findMultiRouting(
+    from: RToken,
+    to: RToken,
+    amountIn: number,
+    pools: Pool[],
+    baseToken: RToken,
+    gasPrice: number
+): MultiRoute | undefined {
+    const g = new Graph(pools, baseToken, gasPrice);
+    const fromV = g.tokens.get(from);
+    if (fromV?.price === 0) {
+        g.setPrices(fromV, 1, 0);
+    }
     const out = g.findBestRoute(from, to, amountIn);
     return out;
 }
