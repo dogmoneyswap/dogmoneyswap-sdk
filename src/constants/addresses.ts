@@ -370,6 +370,35 @@ export const SUSHISWAP_TWAP_1_ORACLE_ADDRESS =
 export const CHAINLINK_ORACLE_ADDRESS =
   '0x00632CFe43d8F9f8E6cD0d39Ffa3D4fa7ec73CFB'
 
+export const STOP_LIMIT_ORDER = {
+  [ChainId.MAINNET]: '',
+  [ChainId.ROPSTEN]: '',
+  [ChainId.RINKEBY]: '',
+  [ChainId.GÖRLI]: '',
+  [ChainId.KOVAN]: '0xce9365dB1C99897f04B3923C03ba9a5f80E8DB87',
+  [ChainId.FANTOM]: '',
+  [ChainId.FANTOM_TESTNET]: '',
+  [ChainId.MATIC]: '0x1aDb3Bd86bb01797667eC382a0BC6A9854b4005f',
+  [ChainId.MATIC_TESTNET]: '',
+  [ChainId.XDAI]: '',
+  [ChainId.BSC]: '',
+  [ChainId.BSC_TESTNET]: '',
+  [ChainId.ARBITRUM]: '',
+  [ChainId.ARBITRUM_TESTNET]: '',
+  [ChainId.MOONBEAM_TESTNET]: '',
+  [ChainId.AVALANCHE]: '',
+  [ChainId.AVALANCHE_TESTNET]: '',
+  [ChainId.HECO]: '',
+  [ChainId.HECO_TESTNET]: '',
+  [ChainId.HARMONY]: '',
+  [ChainId.HARMONY_TESTNET]: '',
+  [ChainId.OKEX]: '',
+  [ChainId.OKEX_TESTNET]: '',
+  [ChainId.CELO]: '',
+  [ChainId.PALM]: '',
+  [ChainId.PALM_TESTNET]: '',
+}
+
 export const BORING_HELPER_ADDRESS = {
   [ChainId.MAINNET]: '0x11Ca5375AdAfd6205E41131A4409f182677996E6',
   [ChainId.ROPSTEN]: '',

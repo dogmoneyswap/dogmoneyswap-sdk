@@ -6,7 +6,7 @@ export interface Token {
 
 export enum PoolType {
     ConstantProduct = 'ConstantProduct',
-    ConstantMean = 'ConstantMean',
+    Weighted = 'Weighted',
     Hybrid = 'Hybrid'
 }
 

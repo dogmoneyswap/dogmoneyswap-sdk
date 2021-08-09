@@ -61,15 +61,20 @@ class Edge {
 
     checkMinimalLiquidityExceededAfterSwap(from: Vertice, amountOut: number): boolean {
         if (from == this.vert0) {
-            if (this.direction)
-                return this.pool.reserve1 - amountOut - this.amountOutPrevious < this.MINIMUM_LIQUIDITY;
-            else
-                return this.pool.reserve1 - amountOut + this.amountOutPrevious < this.MINIMUM_LIQUIDITY;
-        } else
-            if (this.direction)
-                return this.pool.reserve0 - amountOut + this.amountInPrevious < this.MINIMUM_LIQUIDITY;
-            else
-                return this.pool.reserve0 - amountOut - this.amountInPrevious < this.MINIMUM_LIQUIDITY;
+            const r1 = parseInt(this.pool.reserve1.toString());
+            if (this.direction) {
+                return r1 - amountOut - this.amountOutPrevious < this.MINIMUM_LIQUIDITY;
+            } else {
+                return r1 - amountOut + this.amountOutPrevious < this.MINIMUM_LIQUIDITY;
+            }
+        } else {
+            const r0 = parseInt(this.pool.reserve0.toString());
+            if (this.direction) {
+                return r0 - amountOut + this.amountInPrevious < this.MINIMUM_LIQUIDITY;
+            } else {
+                return r0 - amountOut - this.amountInPrevious < this.MINIMUM_LIQUIDITY;
+            }
+        }
     }
 
     applySwap(from: Vertice) {
