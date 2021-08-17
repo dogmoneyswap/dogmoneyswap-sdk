@@ -61,8 +61,8 @@ export class ConstantProductPool {
         twap
       ),
       18,
-      "UNI-V2",
-      "Uniswap V2"
+      "SLP",
+      "Sushi LP Token"
     );
     this.tokenAmounts = currencyAmounts as [
       CurrencyAmount<Token>,

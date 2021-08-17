@@ -10,7 +10,7 @@ export const computePoolInitCodeHash = ({
   creationCode: string;
   deployData: string;
   masterDeployerAddress: string;
-}) =>
+}): string =>
   keccak256(
     ["bytes"],
     [
