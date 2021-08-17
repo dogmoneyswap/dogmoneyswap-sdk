@@ -2,7 +2,7 @@
   "name": "@sushiswap/sdk",
   "license": "MIT",
   "version": "5.0.0-canary.39",
-  "description": "🛠 An SDK for building applications on top of Sushiswap.",
+  "description": "🛠 An SDK for building applications on top of SushiSwap.",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "files": [
@@ -18,7 +18,7 @@
   "scripts": {
     "lint": "tsdx lint src test",
     "build": "tsdx build",
-    "start": "tsdx watch",
+    "watch": "tsdx watch",
     "test": "tsdx test",
     "prepublishOnly": "tsdx build"
   },
