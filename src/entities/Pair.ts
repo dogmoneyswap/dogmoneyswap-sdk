@@ -35,21 +35,21 @@ export class Pair {
 
   public constructor(
     currencyAmountA: CurrencyAmount<Token>,
-    tokenAmountB: CurrencyAmount<Token>
+    currencyAmountB: CurrencyAmount<Token>
   ) {
-    const tokenAmounts = currencyAmountA.currency.sortsBefore(
-      tokenAmountB.currency
+    const currencyAmounts = currencyAmountA.currency.sortsBefore(
+      currencyAmountB.currency
     ) // does safety checks
-      ? [currencyAmountA, tokenAmountB]
-      : [tokenAmountB, currencyAmountA];
+      ? [currencyAmountA, currencyAmountB]
+      : [currencyAmountB, currencyAmountA];
     this.liquidityToken = new Token(
-      tokenAmounts[0].currency.chainId,
-      Pair.getAddress(tokenAmounts[0].currency, tokenAmounts[1].currency),
+      currencyAmounts[0].currency.chainId,
+      Pair.getAddress(currencyAmounts[0].currency, currencyAmounts[1].currency),
       18,
       "UNI-V2",
       "Uniswap V2"
     );
-    this.tokenAmounts = tokenAmounts as [
+    this.tokenAmounts = currencyAmounts as [
       CurrencyAmount<Token>,
       CurrencyAmount<Token>
     ];
