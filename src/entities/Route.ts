@@ -1,55 +1,55 @@
-import { Currency } from './Currency'
-import { Pair } from './Pair'
-import { Price } from './Price'
-import { Token } from './Token'
-import invariant from 'tiny-invariant'
+import { Currency } from "./Currency";
+import { Pair } from "./Pair";
+import { Price } from "./Price";
+import { Token } from "./Token";
+import invariant from "tiny-invariant";
 
 export class Route<TInput extends Currency, TOutput extends Currency> {
-  public readonly pairs: Pair[]
-  public readonly path: Token[]
-  public readonly input: TInput
-  public readonly output: TOutput
+  public readonly pairs: Pair[];
+  public readonly path: Token[];
+  public readonly input: TInput;
+  public readonly output: TOutput;
 
   public constructor(pairs: Pair[], input: TInput, output: TOutput) {
-    invariant(pairs.length > 0, 'PAIRS')
-    const chainId: number = pairs[0].chainId
+    invariant(pairs.length > 0, "PAIRS");
+    const chainId: number = pairs[0].chainId;
     invariant(
       pairs.every(pair => pair.chainId === chainId),
-      'CHAIN_IDS'
-    )
+      "CHAIN_IDS"
+    );
 
-    const wrappedInput = input.wrapped
-    invariant(pairs[0].involvesToken(wrappedInput), 'INPUT')
+    const wrappedInput = input.wrapped;
+    invariant(pairs[0].involvesToken(wrappedInput), "INPUT");
     invariant(
-      typeof output === 'undefined' ||
+      typeof output === "undefined" ||
         pairs[pairs.length - 1].involvesToken(output.wrapped),
-      'OUTPUT'
-    )
+      "OUTPUT"
+    );
 
-    const path: Token[] = [wrappedInput]
+    const path: Token[] = [wrappedInput];
     for (const [i, pair] of pairs.entries()) {
-      const currentInput = path[i]
+      const currentInput = path[i];
       invariant(
         currentInput.equals(pair.token0) || currentInput.equals(pair.token1),
-        'PATH'
-      )
+        "PATH"
+      );
       const output = currentInput.equals(pair.token0)
         ? pair.token1
-        : pair.token0
-      path.push(output)
+        : pair.token0;
+      path.push(output);
     }
 
-    this.pairs = pairs
-    this.path = path
-    this.input = input
-    this.output = output
+    this.pairs = pairs;
+    this.path = path;
+    this.input = input;
+    this.output = output;
   }
 
-  private _midPrice: Price<TInput, TOutput> | null = null
+  private _midPrice: Price<TInput, TOutput> | null = null;
 
   public get midPrice(): Price<TInput, TOutput> {
-    if (this._midPrice !== null) return this._midPrice
-    const prices: Price<Currency, Currency>[] = []
+    if (this._midPrice !== null) return this._midPrice;
+    const prices: Price<Currency, Currency>[] = [];
     for (const [i, pair] of this.pairs.entries()) {
       prices.push(
         this.path[i].equals(pair.token0)
@@ -65,23 +65,23 @@ export class Route<TInput extends Currency, TOutput extends Currency> {
               pair.reserve1.quotient,
               pair.reserve0.quotient
             )
-      )
+      );
     }
     const reduced = prices
       .slice(1)
       .reduce(
         (accumulator, currentValue) => accumulator.multiply(currentValue),
         prices[0]
-      )
+      );
     return (this._midPrice = new Price(
       this.input,
       this.output,
       reduced.denominator,
       reduced.numerator
-    ))
+    ));
   }
 
   public get chainId(): number {
-    return this.pairs[0].chainId
+    return this.pairs[0].chainId;
   }
 }

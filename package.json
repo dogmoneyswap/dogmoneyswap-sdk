@@ -21,12 +21,13 @@
     "watch": "tsdx watch",
     "test": "tsdx test",
     "prepublishOnly": "tsdx build",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "prettier": "prettier --write 'src/**/*.ts' 'test/**/*.ts'"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "eslint --cache --fix",
-      "jest --bail --passWithNoTests --findRelatedTests",
+      "yarn lint",
+      "yarn test --bail --passWithNoTests --findRelatedTests",
       "prettier --write"
     ],
     "*.md": "prettier --write"
@@ -67,6 +68,7 @@
     "@ethersproject/signing-key": "^5.4.0",
     "@ethersproject/solidity": "^5.4.0",
     "@ethersproject/transactions": "^5.4.0",
+    "@sushiswap/core": "2.0.0-canary.1",
     "@sushiswap/prettier-config": "^0.1.0",
     "@types/big.js": "^6.1.0",
     "babel-plugin-transform-jsbi-to-bigint": "^1.4.0",

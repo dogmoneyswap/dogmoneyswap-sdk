@@ -9,10 +9,10 @@ import {
   Matic,
   Okex,
   Palm,
-  xDai,
-} from '../entities/natives'
+  xDai
+} from "../entities/natives";
 
-import { ChainId } from '../enums'
+import { ChainId } from "../enums";
 
 export const NATIVE = {
   [ChainId.MAINNET]: Ether.onChain(ChainId.MAINNET),
@@ -37,5 +37,5 @@ export const NATIVE = {
   [ChainId.OKEX]: Okex.onChain(ChainId.OKEX),
   [ChainId.OKEX_TESTNET]: Okex.onChain(ChainId.OKEX_TESTNET),
   [ChainId.CELO]: Celo.onChain(ChainId.CELO),
-  [ChainId.PALM]: Palm.onChain(ChainId.PALM),
-}
+  [ChainId.PALM]: Palm.onChain(ChainId.PALM)
+};

@@ -1,22 +1,22 @@
-import { ONE, ZERO } from '../constants'
+import { ONE, ZERO } from "../constants";
 
-import { Currency } from './Currency'
-import { CurrencyAmount } from './CurrencyAmount'
-import { Fraction } from './Fraction'
-import { Pair } from './Pair'
-import { Percent } from './Percent'
-import { Price } from './Price'
-import { Route } from './Route'
-import { Token } from './Token'
-import { TradeType } from '../enums'
-import { computePriceImpact } from '../functions/computePriceImpact'
-import invariant from 'tiny-invariant'
-import { sortedInsert } from '../functions/sortedInsert'
+import { Currency } from "./Currency";
+import { CurrencyAmount } from "./CurrencyAmount";
+import { Fraction } from "./Fraction";
+import { Pair } from "./Pair";
+import { Percent } from "./Percent";
+import { Price } from "./Price";
+import { Route } from "./Route";
+import { Token } from "./Token";
+import { TradeType } from "../enums";
+import { computePriceImpact } from "../functions/computePriceImpact";
+import invariant from "tiny-invariant";
+import { sortedInsert } from "../functions/sortedInsert";
 
 // minimal interface so the input output comparator may be shared across types
 interface InputOutput<TInput extends Currency, TOutput extends Currency> {
-  readonly inputAmount: CurrencyAmount<TInput>
-  readonly outputAmount: CurrencyAmount<TOutput>
+  readonly inputAmount: CurrencyAmount<TInput>;
+  readonly outputAmount: CurrencyAmount<TOutput>;
 }
 
 // comparator function that allows sorting trades by their output amounts, in decreasing order, and then input amounts
@@ -28,28 +28,28 @@ export function inputOutputComparator<
   // must have same input and output token for comparison
   invariant(
     a.inputAmount.currency.equals(b.inputAmount.currency),
-    'INPUT_CURRENCY'
-  )
+    "INPUT_CURRENCY"
+  );
   invariant(
     a.outputAmount.currency.equals(b.outputAmount.currency),
-    'OUTPUT_CURRENCY'
-  )
+    "OUTPUT_CURRENCY"
+  );
   if (a.outputAmount.equalTo(b.outputAmount)) {
     if (a.inputAmount.equalTo(b.inputAmount)) {
-      return 0
+      return 0;
     }
     // trade A requires less input than trade B, so A should come first
     if (a.inputAmount.lessThan(b.inputAmount)) {
-      return -1
+      return -1;
     } else {
-      return 1
+      return 1;
     }
   } else {
     // tradeA has less output than trade B, so should come second
     if (a.outputAmount.lessThan(b.outputAmount)) {
-      return 1
+      return 1;
     } else {
-      return -1
+      return -1;
     }
   }
 }
@@ -63,27 +63,27 @@ export function tradeComparator<
   a: Trade<TInput, TOutput, TTradeType>,
   b: Trade<TInput, TOutput, TTradeType>
 ) {
-  const ioComp = inputOutputComparator(a, b)
+  const ioComp = inputOutputComparator(a, b);
   if (ioComp !== 0) {
-    return ioComp
+    return ioComp;
   }
 
   // consider lowest slippage next, since these are less likely to fail
   if (a.priceImpact.lessThan(b.priceImpact)) {
-    return -1
+    return -1;
   } else if (a.priceImpact.greaterThan(b.priceImpact)) {
-    return 1
+    return 1;
   }
 
   // finally consider the number of hops since each hop costs gas
-  return a.route.path.length - b.route.path.length
+  return a.route.path.length - b.route.path.length;
 }
 
 export interface BestTradeOptions {
   // how many results to return
-  maxNumResults?: number
+  maxNumResults?: number;
   // the maximum number of hops a trade should contain
-  maxHops?: number
+  maxHops?: number;
 }
 
 /**
@@ -98,27 +98,27 @@ export class Trade<
   /**
    * The route of the trade, i.e. which pairs the trade goes through and the input/output currencies.
    */
-  public readonly route: Route<TInput, TOutput>
+  public readonly route: Route<TInput, TOutput>;
   /**
    * The type of the trade, either exact in or exact out.
    */
-  public readonly tradeType: TTradeType
+  public readonly tradeType: TTradeType;
   /**
    * The input amount for the trade assuming no slippage.
    */
-  public readonly inputAmount: CurrencyAmount<TInput>
+  public readonly inputAmount: CurrencyAmount<TInput>;
   /**
    * The output amount for the trade assuming no slippage.
    */
-  public readonly outputAmount: CurrencyAmount<TOutput>
+  public readonly outputAmount: CurrencyAmount<TOutput>;
   /**
    * The price expressed in terms of output amount/input amount.
    */
-  public readonly executionPrice: Price<TInput, TOutput>
+  public readonly executionPrice: Price<TInput, TOutput>;
   /**
    * The percent difference between the mid price before the trade and the trade execution price.
    */
-  public readonly priceImpact: Percent
+  public readonly priceImpact: Percent;
 
   /**
    * Constructs an exact in trade with the given amount in and route
@@ -129,7 +129,7 @@ export class Trade<
     route: Route<TInput, TOutput>,
     amountIn: CurrencyAmount<TInput>
   ): Trade<TInput, TOutput, TradeType.EXACT_INPUT> {
-    return new Trade(route, amountIn, TradeType.EXACT_INPUT)
+    return new Trade(route, amountIn, TradeType.EXACT_INPUT);
   }
 
   /**
@@ -141,7 +141,7 @@ export class Trade<
     route: Route<TInput, TOutput>,
     amountOut: CurrencyAmount<TOutput>
   ): Trade<TInput, TOutput, TradeType.EXACT_OUTPUT> {
-    return new Trade(route, amountOut, TradeType.EXACT_OUTPUT)
+    return new Trade(route, amountOut, TradeType.EXACT_OUTPUT);
   }
 
   public constructor(
@@ -151,58 +151,58 @@ export class Trade<
       : CurrencyAmount<TOutput>,
     tradeType: TTradeType
   ) {
-    this.route = route
-    this.tradeType = tradeType
+    this.route = route;
+    this.tradeType = tradeType;
 
-    const tokenAmounts: CurrencyAmount<Token>[] = new Array(route.path.length)
+    const tokenAmounts: CurrencyAmount<Token>[] = new Array(route.path.length);
     if (tradeType === TradeType.EXACT_INPUT) {
-      invariant(amount.currency.equals(route.input), 'INPUT')
-      tokenAmounts[0] = amount.wrapped
+      invariant(amount.currency.equals(route.input), "INPUT");
+      tokenAmounts[0] = amount.wrapped;
       for (let i = 0; i < route.path.length - 1; i++) {
-        const pair = route.pairs[i]
-        const [outputAmount] = pair.getOutputAmount(tokenAmounts[i])
-        tokenAmounts[i + 1] = outputAmount
+        const pair = route.pairs[i];
+        const [outputAmount] = pair.getOutputAmount(tokenAmounts[i]);
+        tokenAmounts[i + 1] = outputAmount;
       }
       this.inputAmount = CurrencyAmount.fromFractionalAmount(
         route.input,
         amount.numerator,
         amount.denominator
-      )
+      );
       this.outputAmount = CurrencyAmount.fromFractionalAmount(
         route.output,
         tokenAmounts[tokenAmounts.length - 1].numerator,
         tokenAmounts[tokenAmounts.length - 1].denominator
-      )
+      );
     } else {
-      invariant(amount.currency.equals(route.output), 'OUTPUT')
-      tokenAmounts[tokenAmounts.length - 1] = amount.wrapped
+      invariant(amount.currency.equals(route.output), "OUTPUT");
+      tokenAmounts[tokenAmounts.length - 1] = amount.wrapped;
       for (let i = route.path.length - 1; i > 0; i--) {
-        const pair = route.pairs[i - 1]
-        const [inputAmount] = pair.getInputAmount(tokenAmounts[i])
-        tokenAmounts[i - 1] = inputAmount
+        const pair = route.pairs[i - 1];
+        const [inputAmount] = pair.getInputAmount(tokenAmounts[i]);
+        tokenAmounts[i - 1] = inputAmount;
       }
       this.inputAmount = CurrencyAmount.fromFractionalAmount(
         route.input,
         tokenAmounts[0].numerator,
         tokenAmounts[0].denominator
-      )
+      );
       this.outputAmount = CurrencyAmount.fromFractionalAmount(
         route.output,
         amount.numerator,
         amount.denominator
-      )
+      );
     }
     this.executionPrice = new Price(
       this.inputAmount.currency,
       this.outputAmount.currency,
       this.inputAmount.quotient,
       this.outputAmount.quotient
-    )
+    );
     this.priceImpact = computePriceImpact(
       route.midPrice,
       this.inputAmount,
       this.outputAmount
-    )
+    );
   }
 
   /**
@@ -210,18 +210,18 @@ export class Trade<
    * @param slippageTolerance tolerance of unfavorable slippage from the execution price of this trade
    */
   public minimumAmountOut(slippageTolerance: Percent): CurrencyAmount<TOutput> {
-    invariant(!slippageTolerance.lessThan(ZERO), 'SLIPPAGE_TOLERANCE')
+    invariant(!slippageTolerance.lessThan(ZERO), "SLIPPAGE_TOLERANCE");
     if (this.tradeType === TradeType.EXACT_OUTPUT) {
-      return this.outputAmount
+      return this.outputAmount;
     } else {
       const slippageAdjustedAmountOut = new Fraction(ONE)
         .add(slippageTolerance)
         .invert()
-        .multiply(this.outputAmount.quotient).quotient
+        .multiply(this.outputAmount.quotient).quotient;
       return CurrencyAmount.fromRawAmount(
         this.outputAmount.currency,
         slippageAdjustedAmountOut
-      )
+      );
     }
   }
 
@@ -230,17 +230,17 @@ export class Trade<
    * @param slippageTolerance tolerance of unfavorable slippage from the execution price of this trade
    */
   public maximumAmountIn(slippageTolerance: Percent): CurrencyAmount<TInput> {
-    invariant(!slippageTolerance.lessThan(ZERO), 'SLIPPAGE_TOLERANCE')
+    invariant(!slippageTolerance.lessThan(ZERO), "SLIPPAGE_TOLERANCE");
     if (this.tradeType === TradeType.EXACT_INPUT) {
-      return this.inputAmount
+      return this.inputAmount;
     } else {
       const slippageAdjustedAmountIn = new Fraction(ONE)
         .add(slippageTolerance)
-        .multiply(this.inputAmount.quotient).quotient
+        .multiply(this.inputAmount.quotient).quotient;
       return CurrencyAmount.fromRawAmount(
         this.inputAmount.currency,
         slippageAdjustedAmountIn
-      )
+      );
     }
   }
 
@@ -271,34 +271,34 @@ export class Trade<
     nextAmountIn: CurrencyAmount<Currency> = currencyAmountIn,
     bestTrades: Trade<TInput, TOutput, TradeType.EXACT_INPUT>[] = []
   ): Trade<TInput, TOutput, TradeType.EXACT_INPUT>[] {
-    invariant(pairs.length > 0, 'PAIRS')
-    invariant(maxHops > 0, 'MAX_HOPS')
+    invariant(pairs.length > 0, "PAIRS");
+    invariant(maxHops > 0, "MAX_HOPS");
     invariant(
       currencyAmountIn === nextAmountIn || currentPairs.length > 0,
-      'INVALID_RECURSION'
-    )
+      "INVALID_RECURSION"
+    );
 
-    const amountIn = nextAmountIn.wrapped
-    const tokenOut = currencyOut.wrapped
+    const amountIn = nextAmountIn.wrapped;
+    const tokenOut = currencyOut.wrapped;
     for (let i = 0; i < pairs.length; i++) {
-      const pair = pairs[i]
+      const pair = pairs[i];
       // pair irrelevant
       if (
         !pair.token0.equals(amountIn.currency) &&
         !pair.token1.equals(amountIn.currency)
       )
-        continue
-      if (pair.reserve0.equalTo(ZERO) || pair.reserve1.equalTo(ZERO)) continue
+        continue;
+      if (pair.reserve0.equalTo(ZERO) || pair.reserve1.equalTo(ZERO)) continue;
 
-      let amountOut: CurrencyAmount<Token>
+      let amountOut: CurrencyAmount<Token>;
       try {
-        ;[amountOut] = pair.getOutputAmount(amountIn)
+        [amountOut] = pair.getOutputAmount(amountIn);
       } catch (error) {
         // input too low
         if (error.isInsufficientInputAmountError) {
-          continue
+          continue;
         }
-        throw error
+        throw error;
       }
       // we have arrived at the output token, so this is the final trade of one of the paths
       if (amountOut.currency.equals(tokenOut)) {
@@ -315,11 +315,11 @@ export class Trade<
           ),
           maxNumResults,
           tradeComparator
-        )
+        );
       } else if (maxHops > 1 && pairs.length > 1) {
         const pairsExcludingThisPair = pairs
           .slice(0, i)
-          .concat(pairs.slice(i + 1, pairs.length))
+          .concat(pairs.slice(i + 1, pairs.length));
 
         // otherwise, consider all the other paths that lead from this token as long as we have not exceeded maxHops
         Trade.bestTradeExactIn(
@@ -328,16 +328,16 @@ export class Trade<
           currencyOut,
           {
             maxNumResults,
-            maxHops: maxHops - 1,
+            maxHops: maxHops - 1
           },
           [...currentPairs, pair],
           amountOut,
           bestTrades
-        )
+        );
       }
     }
 
-    return bestTrades
+    return bestTrades;
   }
 
   /**
@@ -352,7 +352,7 @@ export class Trade<
       this.outputAmount.currency,
       this.maximumAmountIn(slippageTolerance).quotient,
       this.minimumAmountOut(slippageTolerance).quotient
-    )
+    );
   }
 
   /**
@@ -383,34 +383,34 @@ export class Trade<
     nextAmountOut: CurrencyAmount<Currency> = currencyAmountOut,
     bestTrades: Trade<TInput, TOutput, TradeType.EXACT_OUTPUT>[] = []
   ): Trade<TInput, TOutput, TradeType.EXACT_OUTPUT>[] {
-    invariant(pairs.length > 0, 'PAIRS')
-    invariant(maxHops > 0, 'MAX_HOPS')
+    invariant(pairs.length > 0, "PAIRS");
+    invariant(maxHops > 0, "MAX_HOPS");
     invariant(
       currencyAmountOut === nextAmountOut || currentPairs.length > 0,
-      'INVALID_RECURSION'
-    )
+      "INVALID_RECURSION"
+    );
 
-    const amountOut = nextAmountOut.wrapped
-    const tokenIn = currencyIn.wrapped
+    const amountOut = nextAmountOut.wrapped;
+    const tokenIn = currencyIn.wrapped;
     for (let i = 0; i < pairs.length; i++) {
-      const pair = pairs[i]
+      const pair = pairs[i];
       // pair irrelevant
       if (
         !pair.token0.equals(amountOut.currency) &&
         !pair.token1.equals(amountOut.currency)
       )
-        continue
-      if (pair.reserve0.equalTo(ZERO) || pair.reserve1.equalTo(ZERO)) continue
+        continue;
+      if (pair.reserve0.equalTo(ZERO) || pair.reserve1.equalTo(ZERO)) continue;
 
-      let amountIn: CurrencyAmount<Token>
+      let amountIn: CurrencyAmount<Token>;
       try {
-        ;[amountIn] = pair.getInputAmount(amountOut)
+        [amountIn] = pair.getInputAmount(amountOut);
       } catch (error) {
         // not enough liquidity in this pair
         if (error.isInsufficientReservesError) {
-          continue
+          continue;
         }
-        throw error
+        throw error;
       }
       // we have arrived at the input token, so this is the first trade of one of the paths
       if (amountIn.currency.equals(tokenIn)) {
@@ -427,11 +427,11 @@ export class Trade<
           ),
           maxNumResults,
           tradeComparator
-        )
+        );
       } else if (maxHops > 1 && pairs.length > 1) {
         const pairsExcludingThisPair = pairs
           .slice(0, i)
-          .concat(pairs.slice(i + 1, pairs.length))
+          .concat(pairs.slice(i + 1, pairs.length));
 
         // otherwise, consider all the other paths that arrive at this token as long as we have not exceeded maxHops
         Trade.bestTradeExactOut(
@@ -440,15 +440,15 @@ export class Trade<
           currencyAmountOut,
           {
             maxNumResults,
-            maxHops: maxHops - 1,
+            maxHops: maxHops - 1
           },
           [pair, ...currentPairs],
           amountIn,
           bestTrades
-        )
+        );
       }
     }
 
-    return bestTrades
+    return bestTrades;
   }
 }

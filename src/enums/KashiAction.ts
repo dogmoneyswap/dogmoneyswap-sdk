@@ -20,5 +20,5 @@ export enum KashiAction {
   BENTO_SETAPPROVAL = 24,
 
   // Any external call (except to BentoBox)
-  CALL = 30,
+  CALL = 30
 }
