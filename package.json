@@ -1,7 +1,7 @@
 {
   "name": "@sushiswap/sdk",
   "license": "MIT",
-  "version": "5.0.0-canary.41",
+  "version": "5.0.0-canary.42",
   "description": "🛠 An SDK for building applications on top of SushiSwap.",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -35,7 +35,6 @@
   "dependencies": {
     "big.js": "^6.1.0",
     "decimal.js-light": "^2.5.0",
-    "isomorphic-unfetch": "^3.1.0",
     "jsbi": "^3.1.0",
     "tiny-invariant": "^1.1.0",
     "tiny-warning": "^1.0.3",
@@ -53,7 +52,8 @@
     "@ethersproject/providers": "^5.4.0",
     "@ethersproject/signing-key": "^5.4.0",
     "@ethersproject/solidity": "^5.4.0",
-    "@ethersproject/transactions": "^5.4.0"
+    "@ethersproject/transactions": "^5.4.0",
+    "isomorphic-unfetch": "^3.1.0"
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.4.0",
