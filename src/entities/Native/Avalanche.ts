@@ -1,7 +1,7 @@
-import { Token, WNATIVE } from "../Token";
-
 import { Currency } from "../Currency";
 import { NativeCurrency } from "../NativeCurrency";
+import { Token } from "../Token";
+import { WNATIVE } from "../../constants/tokens";
 import invariant from "tiny-invariant";
 
 export class Avalanche extends NativeCurrency {

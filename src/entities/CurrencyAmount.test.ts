@@ -1,9 +1,9 @@
+import { CurrencyAmount } from "./CurrencyAmount";
+import { Ether } from "./Native";
 import JSBI from "jsbi";
 import { MaxUint256 } from "../constants";
-import { Ether } from "./natives/Ether";
-import { Token } from "./Token";
-import { CurrencyAmount } from "./CurrencyAmount";
 import { Percent } from "./Percent";
+import { Token } from "./Token";
 
 describe("CurrencyAmount", () => {
   const ADDRESS_ONE = "0x0000000000000000000000000000000000000001";

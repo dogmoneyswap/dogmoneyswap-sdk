@@ -9,5 +9,5 @@ export * from "./Price";
 export * from "./Route";
 export * from "./Token";
 export * from "./Trade";
-export * from "./natives";
+export * from "./Native";
 export * from "./eip712";

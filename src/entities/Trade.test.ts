@@ -1,16 +1,17 @@
-import JSBI from "jsbi";
 import {
-  Ether,
   CurrencyAmount,
+  Ether,
+  Pair,
   Percent,
-  Token,
-  WETH9,
   Price,
-  Trade,
   Route,
-  Pair
+  Token,
+  Trade
 } from ".";
+
+import JSBI from "jsbi";
 import { TradeType } from "../enums";
+import { WETH9 } from "../constants";
 
 describe("Trade", () => {
   const ETHER = Ether.onChain(1);

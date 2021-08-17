@@ -1,4 +1,6 @@
-import { Pair, Route, Ether, Token, WETH9, CurrencyAmount } from "./index";
+import { CurrencyAmount, Ether, Pair, Route, Token } from "./index";
+
+import { WETH9 } from "../constants";
 
 describe("Route", () => {
   const ETHER = Ether.onChain(1);

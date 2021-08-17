@@ -1,4 +1,5 @@
-import { Ether, Token } from "./index";
+import { Ether } from "./Native";
+import { Token } from "./Token";
 
 describe("Currency", () => {
   const ADDRESS_ZERO = "0x0000000000000000000000000000000000000000";

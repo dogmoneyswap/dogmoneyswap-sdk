@@ -1,6 +1,8 @@
-import { Token, WETH9, Price, CurrencyAmount } from ".";
+import { CurrencyAmount, Price, Token } from ".";
+
 import { InsufficientInputAmountError } from "../errors";
 import { Pair } from "./Pair";
+import { WETH9 } from "../constants";
 import { computePairAddress } from "../functions";
 
 describe("computePairAddress", () => {

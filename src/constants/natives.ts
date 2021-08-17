@@ -10,7 +10,7 @@ import {
   Okex,
   Palm,
   xDai
-} from "../entities/natives";
+} from "../entities/Native";
 
 import { ChainId } from "../enums";
 

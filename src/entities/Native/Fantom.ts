@@ -1,12 +1,12 @@
-import { Token, WNATIVE } from "../Token";
-
 import { Currency } from "../Currency";
 import { NativeCurrency } from "../NativeCurrency";
+import { Token } from "../Token";
+import { WNATIVE } from "../../constants/tokens";
 import invariant from "tiny-invariant";
 
-export class Okex extends NativeCurrency {
+export class Fantom extends NativeCurrency {
   protected constructor(chainId: number) {
-    super(chainId, 18, "OKT", "OKExChain");
+    super(chainId, 18, "FTM", "Fantom");
   }
 
   public get wrapped(): Token {
@@ -15,10 +15,10 @@ export class Okex extends NativeCurrency {
     return wnative;
   }
 
-  private static _cache: { [chainId: number]: Okex } = {};
+  private static _cache: { [chainId: number]: Fantom } = {};
 
-  public static onChain(chainId: number): Okex {
-    return this._cache[chainId] ?? (this._cache[chainId] = new Okex(chainId));
+  public static onChain(chainId: number): Fantom {
+    return this._cache[chainId] ?? (this._cache[chainId] = new Fantom(chainId));
   }
 
   public equals(other: Currency): boolean {

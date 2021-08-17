@@ -1,8 +1,10 @@
-import JSBI from "jsbi";
+import { CurrencyAmount, Ether, Percent, Token } from "./entities";
 import { Pair, Route, Trade } from "./entities";
+
+import JSBI from "jsbi";
 import { Router } from "./router";
+import { WETH9 } from "./constants";
 import invariant from "tiny-invariant";
-import { CurrencyAmount, Percent, Ether, Token, WETH9 } from "./entities";
 
 function checkDeadline(deadline: string[] | string): void {
   expect(typeof deadline).toBe("string");

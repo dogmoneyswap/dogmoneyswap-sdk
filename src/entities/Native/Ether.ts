@@ -1,7 +1,7 @@
-import { Token, WETH9 } from "../Token";
-
 import { Currency } from "../Currency";
 import { NativeCurrency } from "../NativeCurrency";
+import { Token } from "../Token";
+import { WETH9 } from "../../constants/tokens";
 import invariant from "tiny-invariant";
 
 /**
