@@ -1,5 +1,5 @@
 {
-  "include": ["src", "test2"],
+  "include": ["src"],
   "compilerOptions": {
     "target": "es2018",
     "module": "esnext",
@@ -19,7 +19,7 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "moduleResolution": "node",
-    "baseUrl": "./",
+    "baseUrl": ".",
     "paths": {
       "*": ["src/*", "node_modules/*"]
     },
