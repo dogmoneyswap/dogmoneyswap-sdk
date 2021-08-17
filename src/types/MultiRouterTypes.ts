@@ -96,6 +96,39 @@ export class WeightedPool extends Pool {
   }
 }
 
+export const CL_MIN_TICK = -887272;
+export const CL_MAX_TICK = (-CL_MIN_TICK) - 1;
+interface CLTick {
+    index: number;
+    DLiquidity: number;
+}
+
+interface CLSpecific {
+    liquidity: number,
+    sqrtPrice: number,
+    nearestTick: number,
+    ticks: CLTick[]
+}
+
+type CLPoolInfo = PoolInfoNoType & CLSpecific;
+
+export class ConcentratedLiquidityPool extends Pool {
+    liquidity: number;
+    sqrtPrice: number;
+    nearestTick: number;
+    ticks: CLTick[];
+    constructor(info: CLPoolInfo) {
+        super({
+            type: PoolType.ConcentratedLiquidity,
+            ...info
+        })
+        this.liquidity = info.liquidity;
+        this.sqrtPrice = info.sqrtPrice;
+        this.nearestTick = info.nearestTick;
+        this.ticks = info.ticks;
+    }
+}
+
 export interface RouteLeg {
   address: string;
   token: RToken;

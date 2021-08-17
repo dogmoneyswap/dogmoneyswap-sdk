@@ -1,9 +1,12 @@
-import { BigNumber } from "@ethersproject/bignumber";
+import {BigNumber} from '@ethersproject/bignumber'
 import {
   Pool,
   PoolType,
   HybridPool,
-  WeightedPool
+  WeightedPool,
+  ConcentratedLiquidityPool,
+  CL_MIN_TICK,
+  CL_MAX_TICK
 } from "../types/MultiRouterTypes";
 
 const A_PRECISION = 100;
@@ -132,10 +135,81 @@ export function calcOutByIn(
       const dy = parseInt(yBN.sub(yNewBN).toString());
 
       return dy;
+    } 
+    case PoolType.ConcentratedLiquidity: {
+        return ConcentratedLiquidityOutByIn(pool as ConcentratedLiquidityPool, amountIn, direction);
     }
   }
-  console.error("Unknown pool type");
-  return 0;
+}
+
+function ConcentratedLiquidityOutByIn(
+    pool: ConcentratedLiquidityPool,
+    inAmount: number,
+    direction: boolean
+) {
+    if (pool.ticks.length == 0)
+        return 0;
+    if (pool.ticks[0].index > CL_MIN_TICK)
+        pool.ticks.unshift({index: CL_MIN_TICK, DLiquidity: 0});
+    if (pool.ticks[pool.ticks.length-1].index < CL_MAX_TICK)
+        pool.ticks.push({index: CL_MAX_TICK, DLiquidity: 0});
+
+    let nextTickToCross = direction ? pool.nearestTick : pool.nearestTick+1;
+    let currentPrice = pool.sqrtPrice;
+    let currentLiquidity = pool.liquidity;
+    let outAmount = 0;
+    let input = inAmount;
+
+    while (input > 0) {
+        if (nextTickToCross < 0 || nextTickToCross >= pool.ticks.length)
+            return 0;
+
+        const nextTickPrice = Math.sqrt(Math.pow(1.0001, pool.ticks[nextTickToCross].index));
+        let output = 0;
+
+        if (direction) {
+            const maxDx = currentLiquidity*(1/nextTickPrice - 1/currentPrice);
+            if (input <= maxDx) {
+                const newPrice = currentLiquidity/(input + currentLiquidity/currentPrice);
+                output = currentLiquidity*(newPrice - currentPrice);
+                currentPrice = newPrice;
+                input = 0;
+            } else {
+                output = currentLiquidity*(nextTickPrice - currentPrice);
+                currentPrice = nextTickPrice;
+                input -= maxDx;
+                if (pool.ticks[nextTickToCross].index % 2 == 0) {
+                    currentLiquidity -= pool.ticks[nextTickToCross].DLiquidity;
+                } else {
+                    currentLiquidity += pool.ticks[nextTickToCross].DLiquidity;
+                }
+                nextTickToCross--;
+            }
+        } else {
+            const maxDy = currentLiquidity*(currentPrice - nextTickPrice);
+            if (input <= maxDy) {
+                const newPrice = currentPrice + input/currentLiquidity;
+                output = currentLiquidity*(1/currentPrice - 1/newPrice);
+                currentPrice = newPrice;
+                input = 0;
+            } else {
+                output = currentLiquidity*(1/currentPrice - 1/nextTickPrice);
+                currentPrice = nextTickPrice;
+                input -= maxDy;
+                if (pool.ticks[nextTickToCross].index % 2 == 0) {
+                    currentLiquidity += pool.ticks[nextTickToCross].DLiquidity;
+                } else {
+                    currentLiquidity -= pool.ticks[nextTickToCross].DLiquidity;
+                }
+
+                nextTickToCross++;
+            }
+        }
+
+        outAmount += output*(1-pool.fee);
+    }
+
+    return outAmount;
 }
 
 export function calcInByOut(
