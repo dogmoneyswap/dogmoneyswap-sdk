@@ -14,28 +14,38 @@ import {
 
 import { BigintIsh } from "../types";
 import { CurrencyAmount } from "./CurrencyAmount";
+import { Fee } from "../enums";
 import JSBI from "jsbi";
 import { Price } from "./Price";
 import { Token } from "./Token";
-import { computePairAddress } from "../functions/computePairAddress";
+import { computeConstantProductPoolAddress } from "../functions/computePoolAddress";
 import invariant from "tiny-invariant";
 import { sqrt } from "../functions/sqrt";
 
-export class Pair {
+export class ConstantProductPool {
   public readonly liquidityToken: Token;
   private readonly tokenAmounts: [CurrencyAmount<Token>, CurrencyAmount<Token>];
 
-  public static getAddress(tokenA: Token, tokenB: Token): string {
-    return computePairAddress({
+  public static getAddress(
+    tokenA: Token,
+    tokenB: Token,
+    fee: Fee = 25,
+    twap: boolean = true
+  ): string {
+    return computeConstantProductPoolAddress({
       factoryAddress: FACTORY_ADDRESS[tokenA.chainId],
       tokenA,
-      tokenB
+      tokenB,
+      fee,
+      twap
     });
   }
 
   public constructor(
     currencyAmountA: CurrencyAmount<Token>,
-    currencyAmountB: CurrencyAmount<Token>
+    currencyAmountB: CurrencyAmount<Token>,
+    fee: Fee = 25,
+    twap: boolean = true
   ) {
     const currencyAmounts = currencyAmountA.currency.sortsBefore(
       currencyAmountB.currency
@@ -44,10 +54,15 @@ export class Pair {
       : [currencyAmountB, currencyAmountA];
     this.liquidityToken = new Token(
       currencyAmounts[0].currency.chainId,
-      Pair.getAddress(currencyAmounts[0].currency, currencyAmounts[1].currency),
+      ConstantProductPool.getAddress(
+        currencyAmounts[0].currency,
+        currencyAmounts[1].currency,
+        fee,
+        twap
+      ),
       18,
-      "UNI-V2",
-      "Uniswap V2"
+      "SLP",
+      "Sushi LP Token"
     );
     this.tokenAmounts = currencyAmounts as [
       CurrencyAmount<Token>,
@@ -128,7 +143,7 @@ export class Pair {
 
   public getOutputAmount(
     inputAmount: CurrencyAmount<Token>
-  ): [CurrencyAmount<Token>, Pair] {
+  ): [CurrencyAmount<Token>, ConstantProductPool] {
     invariant(this.involvesToken(inputAmount.currency), "TOKEN");
     if (
       JSBI.equal(this.reserve0.quotient, ZERO) ||
@@ -155,7 +170,7 @@ export class Pair {
     }
     return [
       outputAmount,
-      new Pair(
+      new ConstantProductPool(
         inputReserve.add(inputAmount),
         outputReserve.subtract(outputAmount)
       )
@@ -164,7 +179,7 @@ export class Pair {
 
   public getInputAmount(
     outputAmount: CurrencyAmount<Token>
-  ): [CurrencyAmount<Token>, Pair] {
+  ): [CurrencyAmount<Token>, ConstantProductPool] {
     invariant(this.involvesToken(outputAmount.currency), "TOKEN");
     if (
       JSBI.equal(this.reserve0.quotient, ZERO) ||
@@ -195,7 +210,7 @@ export class Pair {
     );
     return [
       inputAmount,
-      new Pair(
+      new ConstantProductPool(
         inputReserve.add(inputAmount),
         outputReserve.subtract(outputAmount)
       )
