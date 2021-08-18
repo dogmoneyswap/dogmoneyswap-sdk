@@ -97,38 +97,38 @@ export class WeightedPool extends Pool {
 }
 
 export const CL_MIN_TICK = -887272;
-export const CL_MAX_TICK = (-CL_MIN_TICK) - 1;
+export const CL_MAX_TICK = -CL_MIN_TICK - 1;
 interface CLTick {
-    index: number;
-    DLiquidity: number;
+  index: number;
+  DLiquidity: number;
 }
 
 interface CLSpecific {
-    liquidity: number,
-    sqrtPrice: number,
-    nearestTick: number,
-    ticks: CLTick[]
+  liquidity: number;
+  sqrtPrice: number;
+  nearestTick: number;
+  ticks: CLTick[];
 }
 
-type CLPoolInfo = Omit<PoolInfoNoType, 'reserve0' | 'reserve1'> & CLSpecific;
+type CLPoolInfo = Omit<PoolInfoNoType, "reserve0" | "reserve1"> & CLSpecific;
 
 export class ConcentratedLiquidityPool extends Pool {
-    liquidity: number;
-    sqrtPrice: number;
-    nearestTick: number;
-    ticks: CLTick[];
-    constructor(info: CLPoolInfo) {
-        super({
-            type: PoolType.ConcentratedLiquidity,            
-            reserve0: BigNumber.from(0),
-            reserve1: BigNumber.from(0),
-            ...info
-        })
-        this.liquidity = info.liquidity;
-        this.sqrtPrice = info.sqrtPrice;
-        this.nearestTick = info.nearestTick;
-        this.ticks = info.ticks;
-    }
+  liquidity: number;
+  sqrtPrice: number;
+  nearestTick: number;
+  ticks: CLTick[];
+  constructor(info: CLPoolInfo) {
+    super({
+      type: PoolType.ConcentratedLiquidity,
+      reserve0: BigNumber.from(0),
+      reserve1: BigNumber.from(0),
+      ...info
+    });
+    this.liquidity = info.liquidity;
+    this.sqrtPrice = info.sqrtPrice;
+    this.nearestTick = info.nearestTick;
+    this.ticks = info.ticks;
+  }
 }
 
 export interface RouteLeg {
