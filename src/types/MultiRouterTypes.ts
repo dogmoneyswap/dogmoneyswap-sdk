@@ -110,7 +110,7 @@ interface CLSpecific {
     ticks: CLTick[]
 }
 
-type CLPoolInfo = PoolInfoNoType & CLSpecific;
+type CLPoolInfo = Omit<PoolInfoNoType, 'reserve0' | 'reserve1'> & CLSpecific;
 
 export class ConcentratedLiquidityPool extends Pool {
     liquidity: number;
@@ -119,7 +119,9 @@ export class ConcentratedLiquidityPool extends Pool {
     ticks: CLTick[];
     constructor(info: CLPoolInfo) {
         super({
-            type: PoolType.ConcentratedLiquidity,
+            type: PoolType.ConcentratedLiquidity,            
+            reserve0: BigNumber.from(0),
+            reserve1: BigNumber.from(0),
             ...info
         })
         this.liquidity = info.liquidity;
