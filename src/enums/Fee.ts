@@ -1,6 +1,4 @@
-// Fee
+// Fee - Tiers TBD
 export enum Fee {
-  MINIMUM = 5,
-  DEFAULT = 25,
-  MAXIMUM = 50
+  DEFAULT = 30
 }
