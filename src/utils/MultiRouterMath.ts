@@ -161,21 +161,24 @@ function ConcentratedLiquidityOutByIn(
     let input = inAmount;
 
     while (input > 0) {
+        
         if (nextTickToCross < 0 || nextTickToCross >= pool.ticks.length)
-            return 0;
-
+            break;
+        
         const nextTickPrice = Math.sqrt(Math.pow(1.0001, pool.ticks[nextTickToCross].index));
+        // console.log('L, P, tick, nextP', currentLiquidity, 
+        //     currentPrice, pool.ticks[nextTickToCross].index, nextTickPrice);
         let output = 0;
 
         if (direction) {
-            const maxDx = currentLiquidity*(1/nextTickPrice - 1/currentPrice);
+            const maxDx = currentLiquidity*(currentPrice - nextTickPrice)/currentPrice/nextTickPrice;
+            //console.log('input, maxDx', input, maxDx);
+            
             if (input <= maxDx) {
-                const newPrice = currentLiquidity/(input + currentLiquidity/currentPrice);
-                output = currentLiquidity*(newPrice - currentPrice);
-                currentPrice = newPrice;
+                output = currentLiquidity*currentPrice*input/(input + currentLiquidity/currentPrice)
                 input = 0;
             } else {
-                output = currentLiquidity*(nextTickPrice - currentPrice);
+                output = currentLiquidity*(currentPrice - nextTickPrice);
                 currentPrice = nextTickPrice;
                 input -= maxDx;
                 if (pool.ticks[nextTickToCross].index % 2 == 0) {
@@ -186,14 +189,13 @@ function ConcentratedLiquidityOutByIn(
                 nextTickToCross--;
             }
         } else {
-            const maxDy = currentLiquidity*(currentPrice - nextTickPrice);
+            const maxDy = currentLiquidity*(nextTickPrice - currentPrice);  
+            //console.log('input, maxDy', input, maxDy);          
             if (input <= maxDy) {
-                const newPrice = currentPrice + input/currentLiquidity;
-                output = currentLiquidity*(1/currentPrice - 1/newPrice);
-                currentPrice = newPrice;
+                output = input/currentPrice/(currentPrice + input/currentLiquidity)
                 input = 0;
             } else {
-                output = currentLiquidity*(1/currentPrice - 1/nextTickPrice);
+                output = currentLiquidity*(nextTickPrice - currentPrice)/currentPrice/nextTickPrice;
                 currentPrice = nextTickPrice;
                 input -= maxDy;
                 if (pool.ticks[nextTickToCross].index % 2 == 0) {
@@ -201,12 +203,12 @@ function ConcentratedLiquidityOutByIn(
                 } else {
                     currentLiquidity -= pool.ticks[nextTickToCross].DLiquidity;
                 }
-
                 nextTickToCross++;
             }
         }
 
         outAmount += output*(1-pool.fee);
+        //console.log('out', outAmount);
     }
 
     return outAmount;
