@@ -24,6 +24,7 @@ import { sqrt } from "../functions/sqrt";
 
 export class ConstantProductPool {
   public readonly liquidityToken: Token;
+  public readonly fee: Fee;
   private readonly tokenAmounts: [CurrencyAmount<Token>, CurrencyAmount<Token>];
 
   public static getAddress(
@@ -64,6 +65,7 @@ export class ConstantProductPool {
       "SLP",
       "Sushi LP Token"
     );
+    this.fee = fee;
     this.tokenAmounts = currencyAmounts as [
       CurrencyAmount<Token>,
       CurrencyAmount<Token>
