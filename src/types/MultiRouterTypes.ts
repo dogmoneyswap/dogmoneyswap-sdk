@@ -66,6 +66,9 @@ export class ConstantProductPool extends Pool {
       ...info
     });
   }
+  // public static fromPool(pool: ConstantProductPool) {
+  //   return
+  // }
 }
 
 type HybridPoolInfo = PoolInfoNoType & { A: number };

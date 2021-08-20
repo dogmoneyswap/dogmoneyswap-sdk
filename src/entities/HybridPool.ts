@@ -23,7 +23,7 @@ import { computeConstantProductPoolAddress } from "../functions/computePoolAddre
 import invariant from "tiny-invariant";
 import { sqrt } from "../functions/sqrt";
 
-export class ConstantProductPool {
+export class HybridPool {
   public readonly liquidityToken: Token;
   public readonly fee: Fee;
   private readonly tokenAmounts: [CurrencyAmount<Token>, CurrencyAmount<Token>];
@@ -56,7 +56,7 @@ export class ConstantProductPool {
       : [currencyAmountB, currencyAmountA];
     this.liquidityToken = new Token(
       currencyAmounts[0].currency.chainId,
-      ConstantProductPool.getAddress(
+      HybridPool.getAddress(
         currencyAmounts[0].currency,
         currencyAmounts[1].currency,
         fee,
@@ -71,6 +71,14 @@ export class ConstantProductPool {
       CurrencyAmount<Token>,
       CurrencyAmount<Token>
     ];
+  }
+
+  /**
+   * Returns assets
+   */
+
+  public getAssets() {
+    //
   }
 
   /**
@@ -146,7 +154,7 @@ export class ConstantProductPool {
 
   public getOutputAmount(
     inputAmount: CurrencyAmount<Token>
-  ): [CurrencyAmount<Token>, ConstantProductPool] {
+  ): [CurrencyAmount<Token>, HybridPool] {
     invariant(this.involvesToken(inputAmount.currency), "TOKEN");
     if (
       JSBI.equal(this.reserve0.quotient, ZERO) ||
@@ -173,7 +181,7 @@ export class ConstantProductPool {
     }
     return [
       outputAmount,
-      new ConstantProductPool(
+      new HybridPool(
         inputReserve.add(inputAmount),
         outputReserve.subtract(outputAmount)
       )
@@ -182,7 +190,7 @@ export class ConstantProductPool {
 
   public getInputAmount(
     outputAmount: CurrencyAmount<Token>
-  ): [CurrencyAmount<Token>, ConstantProductPool] {
+  ): [CurrencyAmount<Token>, HybridPool] {
     invariant(this.involvesToken(outputAmount.currency), "TOKEN");
     if (
       JSBI.equal(this.reserve0.quotient, ZERO) ||
@@ -213,7 +221,7 @@ export class ConstantProductPool {
     );
     return [
       inputAmount,
-      new ConstantProductPool(
+      new HybridPool(
         inputReserve.add(inputAmount),
         outputReserve.subtract(outputAmount)
       )
