@@ -2,8 +2,82 @@ import { WETH9_ADDRESS, WNATIVE_ADDRESS } from "./addresses";
 
 import { ChainId } from "../enums";
 import { Token } from "../entities/Token";
+import { TokenMap } from "../types/TokenMap";
 
-export const WETH9: { [chainId: number]: Token } = {
+export const USDC: TokenMap = {
+  [ChainId.MAINNET]: new Token(
+    ChainId.MAINNET,
+    "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    6,
+    "USDC",
+    "USD Coin"
+  ),
+  [ChainId.ROPSTEN]: new Token(
+    ChainId.ROPSTEN,
+    "0x0D9C8723B343A8368BebE0B5E89273fF8D712e3C",
+    6,
+    "USDC",
+    "USD Coin"
+  ),
+  [ChainId.KOVAN]: new Token(
+    ChainId.KOVAN,
+    "0xb7a4F3E9097C08dA09517b5aB877F7a917224ede",
+    6,
+    "USDC",
+    "USD Coin"
+  ),
+  [ChainId.MATIC]: new Token(
+    ChainId.MATIC,
+    "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+    6,
+    "USDC",
+    "USD Coin"
+  ),
+  [ChainId.FANTOM]: new Token(
+    ChainId.FANTOM,
+    "0x04068DA6C83AFCFA0e13ba15A6696662335D5B75",
+    6,
+    "USDC",
+    "USD Coin"
+  ),
+  [ChainId.BSC]: new Token(
+    ChainId.BSC,
+    "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+    18,
+    "USDC",
+    "USD Coin"
+  ),
+  [ChainId.HARMONY]: new Token(
+    ChainId.HARMONY,
+    "0x985458E523dB3d53125813eD68c274899e9DfAb4",
+    6,
+    "USDC",
+    "USD Coin"
+  ),
+  [ChainId.HECO]: new Token(
+    ChainId.HECO,
+    "0x9362Bbef4B8313A8Aa9f0c9808B80577Aa26B73B",
+    6,
+    "USDC",
+    "USD Coin"
+  ),
+  [ChainId.OKEX]: new Token(
+    ChainId.OKEX,
+    "0xc946DAf81b08146B1C7A8Da2A851Ddf2B3EAaf85",
+    18,
+    "USDC",
+    "USD Coin"
+  ),
+  [ChainId.XDAI]: new Token(
+    ChainId.XDAI,
+    "0xDDAfbb505ad214D7b80b1f830fcCc89B60fb7A83",
+    6,
+    "USDC",
+    "USD Coin"
+  )
+};
+
+export const WETH9: TokenMap = {
   [ChainId.MAINNET]: new Token(
     ChainId.MAINNET,
     WETH9_ADDRESS[ChainId.MAINNET],
@@ -119,7 +193,7 @@ export const WETH9: { [chainId: number]: Token } = {
   )
 };
 
-export const WNATIVE: { [chainId: number]: Token } = {
+export const WNATIVE: TokenMap = {
   [ChainId.MAINNET]: WETH9[ChainId.MAINNET],
   [ChainId.ROPSTEN]: WETH9[ChainId.ROPSTEN],
   [ChainId.RINKEBY]: WETH9[ChainId.RINKEBY],
