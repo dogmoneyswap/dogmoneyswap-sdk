@@ -1,4 +1,4 @@
-import { WETH9_ADDRESS, WNATIVE_ADDRESS } from "./addresses";
+import { USDC_ADDRESS, WETH9_ADDRESS, WNATIVE_ADDRESS } from "./addresses";
 
 import { ChainId } from "../enums";
 import { Token } from "../entities/Token";
@@ -7,70 +7,70 @@ import { TokenMap } from "../types/TokenMap";
 export const USDC: TokenMap = {
   [ChainId.MAINNET]: new Token(
     ChainId.MAINNET,
-    "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    USDC_ADDRESS[ChainId.MAINNET],
     6,
     "USDC",
     "USD Coin"
   ),
   [ChainId.ROPSTEN]: new Token(
     ChainId.ROPSTEN,
-    "0x0D9C8723B343A8368BebE0B5E89273fF8D712e3C",
+    USDC_ADDRESS[ChainId.ROPSTEN],
     6,
     "USDC",
     "USD Coin"
   ),
   [ChainId.KOVAN]: new Token(
     ChainId.KOVAN,
-    "0xb7a4F3E9097C08dA09517b5aB877F7a917224ede",
+    USDC_ADDRESS[ChainId.KOVAN],
     6,
     "USDC",
     "USD Coin"
   ),
   [ChainId.MATIC]: new Token(
     ChainId.MATIC,
-    "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+    USDC_ADDRESS[ChainId.MATIC],
     6,
     "USDC",
     "USD Coin"
   ),
   [ChainId.FANTOM]: new Token(
     ChainId.FANTOM,
-    "0x04068DA6C83AFCFA0e13ba15A6696662335D5B75",
+    USDC_ADDRESS[ChainId.FANTOM],
     6,
     "USDC",
     "USD Coin"
   ),
   [ChainId.BSC]: new Token(
     ChainId.BSC,
-    "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+    USDC_ADDRESS[ChainId.BSC],
     18,
     "USDC",
     "USD Coin"
   ),
   [ChainId.HARMONY]: new Token(
     ChainId.HARMONY,
-    "0x985458E523dB3d53125813eD68c274899e9DfAb4",
+    USDC_ADDRESS[ChainId.HARMONY],
     6,
     "USDC",
     "USD Coin"
   ),
   [ChainId.HECO]: new Token(
     ChainId.HECO,
-    "0x9362Bbef4B8313A8Aa9f0c9808B80577Aa26B73B",
+    USDC_ADDRESS[ChainId.HECO],
     6,
     "USDC",
     "USD Coin"
   ),
   [ChainId.OKEX]: new Token(
     ChainId.OKEX,
-    "0xc946DAf81b08146B1C7A8Da2A851Ddf2B3EAaf85",
+    USDC_ADDRESS[ChainId.OKEX],
     18,
     "USDC",
     "USD Coin"
   ),
   [ChainId.XDAI]: new Token(
     ChainId.XDAI,
-    "0xDDAfbb505ad214D7b80b1f830fcCc89B60fb7A83",
+    USDC_ADDRESS[ChainId.XDAI],
     6,
     "USDC",
     "USD Coin"
