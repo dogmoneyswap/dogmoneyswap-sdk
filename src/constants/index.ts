@@ -1,9 +1,10 @@
 import JSBI from "jsbi";
 
 export * from "./addresses";
+export * from "./kashi";
 export * from "./natives";
-export * from "./tokens";
 export * from "./numbers";
+export * from "./tokens";
 
 export const INIT_CODE_HASH: string =
   "0xe18a34eb0e04b04f7a0ac29a6e80748dca96319b42c54d679cb821dca90c6303";
