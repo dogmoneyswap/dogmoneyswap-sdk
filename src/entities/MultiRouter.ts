@@ -1,5 +1,6 @@
-import { Pool, RToken, RouteLeg, MultiRoute } from '../types/MultiRouterTypes'
-import { ASSERT, calcInByOut, calcOutByIn, closeValues, calcPrice } from '../utils/MultiRouterMath'
+import { ASSERT, calcInByOut, calcOutByIn, calcPrice, closeValues } from '../utils/MultiRouterMath'
+import { MultiRoute, Pool, RToken, RouteLeg } from '../types/MultiRouterTypes'
+
 import TopologicalSort from '../utils/TopologicalSort'
 
 class Edge {
