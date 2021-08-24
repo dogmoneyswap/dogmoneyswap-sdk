@@ -3,37 +3,55 @@ import { InsufficientInputAmountError, InsufficientReservesError } from '../erro
 
 import { BigintIsh } from '../types'
 import { CurrencyAmount } from './CurrencyAmount'
+import { Fee } from '../enums'
 import JSBI from 'jsbi'
 import { Price } from './Price'
 import { Token } from './Token'
-import { computePairAddress } from '../functions/computePairAddress'
+import { computeConstantProductPoolAddress } from '../functions/computePoolAddress'
 import invariant from 'tiny-invariant'
 import { sqrt } from '../functions/sqrt'
 
-export class Pair {
+export class HybridPool {
   public readonly liquidityToken: Token
+  public readonly fee: Fee
   private readonly tokenAmounts: [CurrencyAmount<Token>, CurrencyAmount<Token>]
 
-  public static getAddress(tokenA: Token, tokenB: Token): string {
-    return computePairAddress({
+  public static getAddress(tokenA: Token, tokenB: Token, fee: Fee = 25, twap: boolean = true): string {
+    return computeConstantProductPoolAddress({
       factoryAddress: FACTORY_ADDRESS[tokenA.chainId],
       tokenA,
-      tokenB
+      tokenB,
+      fee,
+      twap
     })
   }
 
-  public constructor(currencyAmountA: CurrencyAmount<Token>, currencyAmountB: CurrencyAmount<Token>) {
+  public constructor(
+    currencyAmountA: CurrencyAmount<Token>,
+    currencyAmountB: CurrencyAmount<Token>,
+    fee: Fee = 25,
+    twap: boolean = true
+  ) {
     const currencyAmounts = currencyAmountA.currency.sortsBefore(currencyAmountB.currency) // does safety checks
       ? [currencyAmountA, currencyAmountB]
       : [currencyAmountB, currencyAmountA]
     this.liquidityToken = new Token(
       currencyAmounts[0].currency.chainId,
-      Pair.getAddress(currencyAmounts[0].currency, currencyAmounts[1].currency),
+      HybridPool.getAddress(currencyAmounts[0].currency, currencyAmounts[1].currency, fee, twap),
       18,
-      'UNI-V2',
-      'Uniswap V2'
+      'SLP',
+      'Sushi LP Token'
     )
+    this.fee = fee
     this.tokenAmounts = currencyAmounts as [CurrencyAmount<Token>, CurrencyAmount<Token>]
+  }
+
+  /**
+   * Returns assets
+   */
+
+  public getAssets() {
+    //
   }
 
   /**
@@ -97,7 +115,7 @@ export class Pair {
     return token.equals(this.token0) ? this.reserve0 : this.reserve1
   }
 
-  public getOutputAmount(inputAmount: CurrencyAmount<Token>): [CurrencyAmount<Token>, Pair] {
+  public getOutputAmount(inputAmount: CurrencyAmount<Token>): [CurrencyAmount<Token>, HybridPool] {
     invariant(this.involvesToken(inputAmount.currency), 'TOKEN')
     if (JSBI.equal(this.reserve0.quotient, ZERO) || JSBI.equal(this.reserve1.quotient, ZERO)) {
       throw new InsufficientReservesError()
@@ -114,10 +132,10 @@ export class Pair {
     if (JSBI.equal(outputAmount.quotient, ZERO)) {
       throw new InsufficientInputAmountError()
     }
-    return [outputAmount, new Pair(inputReserve.add(inputAmount), outputReserve.subtract(outputAmount))]
+    return [outputAmount, new HybridPool(inputReserve.add(inputAmount), outputReserve.subtract(outputAmount))]
   }
 
-  public getInputAmount(outputAmount: CurrencyAmount<Token>): [CurrencyAmount<Token>, Pair] {
+  public getInputAmount(outputAmount: CurrencyAmount<Token>): [CurrencyAmount<Token>, HybridPool] {
     invariant(this.involvesToken(outputAmount.currency), 'TOKEN')
     if (
       JSBI.equal(this.reserve0.quotient, ZERO) ||
@@ -130,12 +148,15 @@ export class Pair {
     const outputReserve = this.reserveOf(outputAmount.currency)
     const inputReserve = this.reserveOf(outputAmount.currency.equals(this.token0) ? this.token1 : this.token0)
     const numerator = JSBI.multiply(JSBI.multiply(inputReserve.quotient, outputAmount.quotient), _1000)
-    const denominator = JSBI.multiply(JSBI.subtract(outputReserve.quotient, outputAmount.quotient), _997)
+    const denominator = JSBI.multiply(
+      JSBI.subtract(outputReserve.quotient, outputAmount.quotient),
+      _997 // 3%
+    )
     const inputAmount = CurrencyAmount.fromRawAmount(
       outputAmount.currency.equals(this.token0) ? this.token1 : this.token0,
       JSBI.add(JSBI.divide(numerator, denominator), ONE)
     )
-    return [inputAmount, new Pair(inputReserve.add(inputAmount), outputReserve.subtract(outputAmount))]
+    return [inputAmount, new HybridPool(inputReserve.add(inputAmount), outputReserve.subtract(outputAmount))]
   }
 
   public getLiquidityMinted(

@@ -1,28 +1,22 @@
-import { keccak256, pack } from "@ethersproject/solidity";
+import { keccak256, pack } from '@ethersproject/solidity'
 
-import { defaultAbiCoder } from "@ethersproject/abi";
+import { defaultAbiCoder } from '@ethersproject/abi'
 
 export const computePoolInitCodeHash = ({
   creationCode,
   deployData,
   masterDeployerAddress
 }: {
-  creationCode: string;
-  deployData: string;
-  masterDeployerAddress: string;
+  creationCode: string
+  deployData: string
+  masterDeployerAddress: string
 }): string =>
   keccak256(
-    ["bytes"],
+    ['bytes'],
     [
       pack(
-        ["bytes", "bytes"],
-        [
-          creationCode,
-          defaultAbiCoder.encode(
-            ["bytes", "address"],
-            [deployData, masterDeployerAddress]
-          )
-        ]
+        ['bytes', 'bytes'],
+        [creationCode, defaultAbiCoder.encode(['bytes', 'address'], [deployData, masterDeployerAddress])]
       )
     ]
-  );
+  )
