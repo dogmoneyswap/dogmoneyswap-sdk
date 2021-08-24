@@ -1,4 +1,10 @@
-import { Pool, RToken, RouteLeg, MultiRoute } from "../types/MultiRouterTypes";
+import {
+  Pool,
+  RToken,
+  RouteLeg,
+  MultiRoute,
+  RouteStatus
+} from "../types/MultiRouterTypes";
 import {
   ASSERT,
   calcInByOut,
@@ -279,10 +285,16 @@ class Graph {
       closestVert.edges.forEach(e => {
         const v2 = closestVert == e.vert0 ? e.vert1 : e.vert0;
         if (processedVert.has(v2)) return;
-        const [newIncome, gas] = e.calcOutput(
-          closestVert as Vertice,
-          (closestVert as Vertice).bestIncome
-        );
+        let newIncome, gas;
+        try {
+          [newIncome, gas] = e.calcOutput(
+            closestVert as Vertice,
+            (closestVert as Vertice).bestIncome
+          );
+        } catch (e) {
+          // Any arithmetic error or out-of-liquidity
+          return;
+        }
         // TODO: to test !!!!!!!!!!!!!!!!!!!!!!!!!!!!
         if (
           e.checkMinimalLiquidityExceededAfterSwap(
@@ -324,7 +336,7 @@ class Graph {
     to: RToken,
     amountIn: number,
     steps = 100
-  ): MultiRoute | undefined {
+  ): MultiRoute {
     this.edges.forEach(e => {
       e.amountInPrevious = 0;
       e.amountOutPrevious = 0;
@@ -333,10 +345,11 @@ class Graph {
     let output = 0;
     let gasSpent = 0;
     let totalOutput = 0;
-    for (let step = 0; step < steps; ++step) {
+    let step;
+    for (step = 0; step < steps; ++step) {
       const p = this.findBestPath(from, to, amountIn / steps);
       if (!p) {
-        return;
+        break;
       } else {
         //console.log(step, totalOutput, p.gasSpent, p.output);
         output += p.output;
@@ -345,8 +358,14 @@ class Graph {
         this.addPath(this.tokens.get(from), p.path);
       }
     }
+    let status;
+    if (step == 0) status = RouteStatus.NoWay;
+    else if (step < steps) status = RouteStatus.Partial;
+    else status = RouteStatus.Success;
+
     return {
-      amountIn,
+      status,
+      amountIn: (amountIn / steps) * step,
       amountOut: output,
       legs: this.getRouteLegs(),
       gasSpent: gasSpent,

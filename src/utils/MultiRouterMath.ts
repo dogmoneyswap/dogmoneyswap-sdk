@@ -121,7 +121,8 @@ export function calcOutByIn(
         ? wPool.weight0 / wPool.weight1
         : wPool.weight1 / wPool.weight0;
       const actualIn = amountIn * (1 - pool.fee);
-      return y * (1 - Math.pow(x / (x + actualIn), weightRatio));
+      const out = y * (1 - Math.pow(x / (x + actualIn), weightRatio));
+      return out;
     }
     case PoolType.Hybrid: {
       // const xNew = x + amountIn*(1-pool.fee);
@@ -146,6 +147,8 @@ export function calcOutByIn(
   }
 }
 
+export class OutOfLiquidity extends Error {}
+
 function ConcentratedLiquidityOutByIn(
   pool: ConcentratedLiquidityPool,
   inAmount: number,
@@ -164,7 +167,8 @@ function ConcentratedLiquidityOutByIn(
   let input = inAmount;
 
   while (input > 0) {
-    if (nextTickToCross < 0 || nextTickToCross >= pool.ticks.length) break;
+    if (nextTickToCross < 0 || nextTickToCross >= pool.ticks.length)
+      throw new OutOfLiquidity();
 
     const nextTickPrice = Math.sqrt(
       Math.pow(1.0001, pool.ticks[nextTickToCross].index)
@@ -254,9 +258,10 @@ export function calcInByOut(
     }
     case PoolType.Hybrid: {
       let yNewBN = yBN.sub(getBigNumber(undefined, amountOut));
-      if (yNewBN.lt(1))   // lack of precision
+      if (yNewBN.lt(1))
+        // lack of precision
         yNewBN = BigNumber.from(1);
-      
+
       const xNewBN = HybridgetY(pool as HybridPool, yNewBN);
       input = Math.round(parseInt(xNewBN.sub(xBN).toString()) / (1 - pool.fee));
 
@@ -268,15 +273,14 @@ export function calcInByOut(
     default:
       console.error("Unknown pool type");
   }
-  
+
   // ASSERT(() => {
   //   const amount2 = calcOutByIn(pool, input, direction);
   //   const res = closeValues(amountOut, amount2, 1e-6);
   //   if (!res) console.log("Error 138:", amountOut, amount2, Math.abs(amountOut/amount2 - 1));
   //   return res;
   // });
-  if (input < 1)
-    input = 1;
+  if (input < 1) input = 1;
   return input;
 }
 
