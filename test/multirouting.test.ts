@@ -1,10 +1,7 @@
-import { BigNumber } from "@ethersproject/bignumber";
-import {
-  ConstantProductPool,
-  RouteStatus
-} from "../src/types/MultiRouterTypes";
-import { findMultiRouting } from "../src/entities/MultiRouter";
-const gasPrice = 1 * 200 * 1e-9;
+import { BigNumber } from '@ethersproject/bignumber'
+import { ConstantProductPool, RouteStatus } from '../src/types/MultiRouterTypes'
+import { findMultiRouting } from '../src/entities/MultiRouter'
+const gasPrice = 1 * 200 * 1e-9
 
 // Bridge:
 //   /1\
@@ -40,32 +37,25 @@ describe('Multirouting for bridge topology', () => {
   it('works correct', () => {
     const res = findMultiRouting(tokens[0], tokens[3], 10000, testPools, tokens[2], gasPrice)
 
-    expect(res).toBeDefined();
-    expect(res?.status).toEqual(RouteStatus.Success);
-    expect(res?.legs.length).toEqual(testPools.length);
-    expect(res?.legs[res.legs.length - 1].swapPortion).toEqual(1);
-  });
+    expect(res).toBeDefined()
+    expect(res?.status).toEqual(RouteStatus.Success)
+    expect(res?.legs.length).toEqual(testPools.length)
+    expect(res?.legs[res.legs.length - 1].swapPortion).toEqual(1)
+  })
 
   it('unknown gas price', () => {
     const res = findMultiRouting(tokens[0], tokens[3], 20000, testPools, tokens[4], gasPrice)
 
-    expect(res).toBeDefined();
-    expect(res?.status).toEqual(RouteStatus.Success);
-    expect(res?.legs.length).toEqual(testPools.length);
-    expect(res?.legs[res.legs.length - 1].swapPortion).toEqual(1);
-  });
+    expect(res).toBeDefined()
+    expect(res?.status).toEqual(RouteStatus.Success)
+    expect(res?.legs.length).toEqual(testPools.length)
+    expect(res?.legs[res.legs.length - 1].swapPortion).toEqual(1)
+  })
 
-  it("not connected tokens", () => {
-    const res = findMultiRouting(
-      tokens[0],
-      tokens[4],
-      20000,
-      testPools,
-      tokens[2],
-      gasPrice
-    );
+  it('not connected tokens', () => {
+    const res = findMultiRouting(tokens[0], tokens[4], 20000, testPools, tokens[2], gasPrice)
 
-    expect(res).toBeDefined();
-    expect(res?.status).toEqual(RouteStatus.NoWay);
-  });
-});
+    expect(res).toBeDefined()
+    expect(res?.status).toEqual(RouteStatus.NoWay)
+  })
+})

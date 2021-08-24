@@ -1,18 +1,6 @@
-import {
-  Pool,
-  RToken,
-  RouteLeg,
-  MultiRoute,
-  RouteStatus
-} from "../types/MultiRouterTypes";
-import {
-  ASSERT,
-  calcInByOut,
-  calcOutByIn,
-  closeValues,
-  calcPrice
-} from "../utils/MultiRouterMath";
-import TopologicalSort from "../utils/TopologicalSort";
+import { Pool, RToken, RouteLeg, MultiRoute, RouteStatus } from '../types/MultiRouterTypes'
+import { ASSERT, calcInByOut, calcOutByIn, closeValues, calcPrice } from '../utils/MultiRouterMath'
+import TopologicalSort from '../utils/TopologicalSort'
 
 class Edge {
   readonly GasConsumption = 40_000
@@ -252,17 +240,14 @@ class Graph {
       nextVertList.splice(closestPosition, 1)
 
       closestVert.edges.forEach(e => {
-        const v2 = closestVert == e.vert0 ? e.vert1 : e.vert0;
-        if (processedVert.has(v2)) return;
-        let newIncome, gas;
+        const v2 = closestVert == e.vert0 ? e.vert1 : e.vert0
+        if (processedVert.has(v2)) return
+        let newIncome, gas
         try {
-          [newIncome, gas] = e.calcOutput(
-            closestVert as Vertice,
-            (closestVert as Vertice).bestIncome
-          );
+          ;[newIncome, gas] = e.calcOutput(closestVert as Vertice, (closestVert as Vertice).bestIncome)
         } catch (e) {
           // Any arithmetic error or out-of-liquidity
-          return;
+          return
         }
         // TODO: to test !!!!!!!!!!!!!!!!!!!!!!!!!!!!
         if (e.checkMinimalLiquidityExceededAfterSwap(closestVert as Vertice, newIncome)) return
@@ -294,25 +279,20 @@ class Graph {
     })
   }
 
-  findBestRoute(
-    from: RToken,
-    to: RToken,
-    amountIn: number,
-    steps = 100
-  ): MultiRoute {
+  findBestRoute(from: RToken, to: RToken, amountIn: number, steps = 100): MultiRoute {
     this.edges.forEach(e => {
-      e.amountInPrevious = 0;
-      e.amountOutPrevious = 0;
-      e.direction = true;
-    });
-    let output = 0;
-    let gasSpent = 0;
-    let totalOutput = 0;
-    let step;
+      e.amountInPrevious = 0
+      e.amountOutPrevious = 0
+      e.direction = true
+    })
+    let output = 0
+    let gasSpent = 0
+    let totalOutput = 0
+    let step
     for (step = 0; step < steps; ++step) {
-      const p = this.findBestPath(from, to, amountIn / steps);
+      const p = this.findBestPath(from, to, amountIn / steps)
       if (!p) {
-        break;
+        break
       } else {
         //console.log(step, totalOutput, p.gasSpent, p.output);
         output += p.output
@@ -321,10 +301,10 @@ class Graph {
         this.addPath(this.tokens.get(from), p.path)
       }
     }
-    let status;
-    if (step == 0) status = RouteStatus.NoWay;
-    else if (step < steps) status = RouteStatus.Partial;
-    else status = RouteStatus.Success;
+    let status
+    if (step == 0) status = RouteStatus.NoWay
+    else if (step < steps) status = RouteStatus.Partial
+    else status = RouteStatus.Success
 
     return {
       status,

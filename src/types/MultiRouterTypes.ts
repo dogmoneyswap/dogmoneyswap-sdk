@@ -142,15 +142,15 @@ export interface RouteLeg {
 }
 
 export enum RouteStatus {
-  Success = "Success",
-  NoWay = "NoWay",
-  Partial = "Partial"
+  Success = 'Success',
+  NoWay = 'NoWay',
+  Partial = 'Partial'
 }
 export interface MultiRoute {
-  status: RouteStatus;
-  amountIn: number;
-  amountOut: number;
-  legs: RouteLeg[];
-  gasSpent: number;
-  totalAmountOut: number;
+  status: RouteStatus
+  amountIn: number
+  amountOut: number
+  legs: RouteLeg[]
+  gasSpent: number
+  totalAmountOut: number
 }

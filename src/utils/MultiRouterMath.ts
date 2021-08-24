@@ -110,15 +110,13 @@ export function calcOutByIn(pool: Pool, amountIn: number, direction = true): num
       return (y * amountIn) / (x / (1 - pool.fee) + amountIn)
     }
     case PoolType.Weighted: {
-      const x = parseInt(xBN.toString());
-      const y = parseInt(yBN.toString());
-      const wPool = pool as WeightedPool;
-      const weightRatio = direction
-        ? wPool.weight0 / wPool.weight1
-        : wPool.weight1 / wPool.weight0;
-      const actualIn = amountIn * (1 - pool.fee);
-      const out = y * (1 - Math.pow(x / (x + actualIn), weightRatio));
-      return out;
+      const x = parseInt(xBN.toString())
+      const y = parseInt(yBN.toString())
+      const wPool = pool as WeightedPool
+      const weightRatio = direction ? wPool.weight0 / wPool.weight1 : wPool.weight1 / wPool.weight0
+      const actualIn = amountIn * (1 - pool.fee)
+      const out = y * (1 - Math.pow(x / (x + actualIn), weightRatio))
+      return out
     }
     case PoolType.Hybrid: {
       // const xNew = x + amountIn*(1-pool.fee);
@@ -139,26 +137,19 @@ export function calcOutByIn(pool: Pool, amountIn: number, direction = true): num
 
 export class OutOfLiquidity extends Error {}
 
-function ConcentratedLiquidityOutByIn(
-  pool: ConcentratedLiquidityPool,
-  inAmount: number,
-  direction: boolean
-) {
-  if (pool.ticks.length == 0) return 0;
-  if (pool.ticks[0].index > CL_MIN_TICK)
-    pool.ticks.unshift({ index: CL_MIN_TICK, DLiquidity: 0 });
-  if (pool.ticks[pool.ticks.length - 1].index < CL_MAX_TICK)
-    pool.ticks.push({ index: CL_MAX_TICK, DLiquidity: 0 });
+function ConcentratedLiquidityOutByIn(pool: ConcentratedLiquidityPool, inAmount: number, direction: boolean) {
+  if (pool.ticks.length == 0) return 0
+  if (pool.ticks[0].index > CL_MIN_TICK) pool.ticks.unshift({ index: CL_MIN_TICK, DLiquidity: 0 })
+  if (pool.ticks[pool.ticks.length - 1].index < CL_MAX_TICK) pool.ticks.push({ index: CL_MAX_TICK, DLiquidity: 0 })
 
-  let nextTickToCross = direction ? pool.nearestTick : pool.nearestTick + 1;
-  let currentPrice = pool.sqrtPrice;
-  let currentLiquidity = pool.liquidity;
-  let outAmount = 0;
-  let input = inAmount;
+  let nextTickToCross = direction ? pool.nearestTick : pool.nearestTick + 1
+  let currentPrice = pool.sqrtPrice
+  let currentLiquidity = pool.liquidity
+  let outAmount = 0
+  let input = inAmount
 
   while (input > 0) {
-    if (nextTickToCross < 0 || nextTickToCross >= pool.ticks.length)
-      throw new OutOfLiquidity();
+    if (nextTickToCross < 0 || nextTickToCross >= pool.ticks.length) throw new OutOfLiquidity()
 
     const nextTickPrice = Math.sqrt(Math.pow(1.0001, pool.ticks[nextTickToCross].index))
     // console.log('L, P, tick, nextP', currentLiquidity,
@@ -229,13 +220,13 @@ export function calcInByOut(pool: Pool, amountOut: number, direction: boolean): 
       break
     }
     case PoolType.Hybrid: {
-      let yNewBN = yBN.sub(getBigNumber(undefined, amountOut));
+      let yNewBN = yBN.sub(getBigNumber(undefined, amountOut))
       if (yNewBN.lt(1))
         // lack of precision
-        yNewBN = BigNumber.from(1);
+        yNewBN = BigNumber.from(1)
 
-      const xNewBN = HybridgetY(pool as HybridPool, yNewBN);
-      input = Math.round(parseInt(xNewBN.sub(xBN).toString()) / (1 - pool.fee));
+      const xNewBN = HybridgetY(pool as HybridPool, yNewBN)
+      input = Math.round(parseInt(xNewBN.sub(xBN).toString()) / (1 - pool.fee))
 
       // const yNew = y - amountOut;
       // const xNew = HybridgetY(pool, yNew);
@@ -252,8 +243,8 @@ export function calcInByOut(pool: Pool, amountOut: number, direction: boolean): 
   //   if (!res) console.log("Error 138:", amountOut, amount2, Math.abs(amountOut/amount2 - 1));
   //   return res;
   // });
-  if (input < 1) input = 1;
-  return input;
+  if (input < 1) input = 1
+  return input
 }
 
 export function calcPrice(pool: Pool, amountIn: number): number {
