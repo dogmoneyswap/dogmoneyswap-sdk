@@ -14,7 +14,7 @@ const A_PRECISION = 100
 const DCacheBN = new Map<Pool, BigNumber>()
 export function HybridComputeLiquidity(pool: HybridPool): BigNumber {
   const res = DCacheBN.get(pool)
-  if (res != undefined) return res
+  if (res !== undefined) return res
 
   const r0 = pool.reserve0
   const r1 = pool.reserve1
@@ -115,7 +115,8 @@ export function calcOutByIn(pool: Pool, amountIn: number, direction = true): num
       const wPool = pool as WeightedPool
       const weightRatio = direction ? wPool.weight0 / wPool.weight1 : wPool.weight1 / wPool.weight0
       const actualIn = amountIn * (1 - pool.fee)
-      return y * (1 - Math.pow(x / (x + actualIn), weightRatio))
+      const out = y * (1 - Math.pow(x / (x + actualIn), weightRatio))
+      return out
     }
     case PoolType.Hybrid: {
       // const xNew = x + amountIn*(1-pool.fee);
@@ -134,8 +135,10 @@ export function calcOutByIn(pool: Pool, amountIn: number, direction = true): num
   }
 }
 
+export class OutOfLiquidity extends Error {}
+
 function ConcentratedLiquidityOutByIn(pool: ConcentratedLiquidityPool, inAmount: number, direction: boolean) {
-  if (pool.ticks.length == 0) return 0
+  if (pool.ticks.length === 0) return 0
   if (pool.ticks[0].index > CL_MIN_TICK) pool.ticks.unshift({ index: CL_MIN_TICK, DLiquidity: 0 })
   if (pool.ticks[pool.ticks.length - 1].index < CL_MAX_TICK) pool.ticks.push({ index: CL_MAX_TICK, DLiquidity: 0 })
 
@@ -146,7 +149,7 @@ function ConcentratedLiquidityOutByIn(pool: ConcentratedLiquidityPool, inAmount:
   let input = inAmount
 
   while (input > 0) {
-    if (nextTickToCross < 0 || nextTickToCross >= pool.ticks.length) break
+    if (nextTickToCross < 0 || nextTickToCross >= pool.ticks.length) throw new OutOfLiquidity()
 
     const nextTickPrice = Math.sqrt(Math.pow(1.0001, pool.ticks[nextTickToCross].index))
     // console.log('L, P, tick, nextP', currentLiquidity,
@@ -164,7 +167,7 @@ function ConcentratedLiquidityOutByIn(pool: ConcentratedLiquidityPool, inAmount:
         output = currentLiquidity * (currentPrice - nextTickPrice)
         currentPrice = nextTickPrice
         input -= maxDx
-        if (pool.ticks[nextTickToCross].index % 2 == 0) {
+        if (pool.ticks[nextTickToCross].index % 2 === 0) {
           currentLiquidity -= pool.ticks[nextTickToCross].DLiquidity
         } else {
           currentLiquidity += pool.ticks[nextTickToCross].DLiquidity
@@ -181,7 +184,7 @@ function ConcentratedLiquidityOutByIn(pool: ConcentratedLiquidityPool, inAmount:
         output = (currentLiquidity * (nextTickPrice - currentPrice)) / currentPrice / nextTickPrice
         currentPrice = nextTickPrice
         input -= maxDy
-        if (pool.ticks[nextTickToCross].index % 2 == 0) {
+        if (pool.ticks[nextTickToCross].index % 2 === 0) {
           currentLiquidity += pool.ticks[nextTickToCross].DLiquidity
         } else {
           currentLiquidity -= pool.ticks[nextTickToCross].DLiquidity
@@ -301,14 +304,14 @@ export function calcInputByPrice(pool: Pool, priceEffective: number, hint = 1): 
   return 0
 }
 
-//====================== Utils ========================
+//================================= Utils ====================================
 
 export function ASSERT(f: () => boolean, t?: string) {
   if (!f() && t) console.error(t)
 }
 
 export function closeValues(a: number, b: number, accuracy: number): boolean {
-  if (accuracy == 0) return a == b
+  if (accuracy === 0) return a === b
   if (a < 1 / accuracy) return Math.abs(a - b) <= 10
   return Math.abs(a / b - 1) < accuracy
 }
@@ -340,7 +343,7 @@ export function revertPositive(f: (x: number) => number, out: number, hint = 1) 
     while (max / min - 1 > 1e-4) {
       const x0: number = (min + max) / 2
       const y0 = f(x0)
-      if (out == y0) return x0
+      if (out === y0) return x0
       if (out < y0) max = x0
       else min = x0
     }

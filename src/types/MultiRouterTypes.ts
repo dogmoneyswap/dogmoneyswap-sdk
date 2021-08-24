@@ -141,7 +141,13 @@ export interface RouteLeg {
   absolutePortion: number // To depict at webpage for user
 }
 
+export enum RouteStatus {
+  Success = 'Success',
+  NoWay = 'NoWay',
+  Partial = 'Partial'
+}
 export interface MultiRoute {
+  status: RouteStatus
   amountIn: number
   amountOut: number
   legs: RouteLeg[]

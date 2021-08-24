@@ -1,6 +1,5 @@
-import { ASSERT, calcInByOut, calcOutByIn, calcPrice, closeValues } from '../utils/MultiRouterMath'
-import { MultiRoute, Pool, RToken, RouteLeg } from '../types/MultiRouterTypes'
-
+import { Pool, RToken, RouteLeg, MultiRoute, RouteStatus } from '../types/MultiRouterTypes'
+import { ASSERT, calcInByOut, calcOutByIn, closeValues, calcPrice } from '../utils/MultiRouterMath'
 import TopologicalSort from '../utils/TopologicalSort'
 
 class Edge {
@@ -27,14 +26,14 @@ class Edge {
     const pool = this.pool
     let out,
       gas = this.amountInPrevious ? 0 : this.GasConsumption
-    if (v == this.vert1) {
+    if (v === this.vert1) {
       if (this.direction) {
         if (amountIn < this.amountOutPrevious) {
           out = this.amountInPrevious - calcInByOut(pool, this.amountOutPrevious - amountIn, false)
         } else {
           out = calcOutByIn(pool, amountIn - this.amountOutPrevious, false) + this.amountInPrevious
         }
-        if (amountIn == this.amountOutPrevious)
+        if (amountIn === this.amountOutPrevious)
           // TODO: accuracy?
           gas = -this.GasConsumption
       } else {
@@ -48,7 +47,7 @@ class Edge {
         const price = this.vert1.price / this.vert0.price
         console.assert(out < amountIn * price && out >= 0)
       } else {
-        if (amountIn == this.amountOutPrevious)
+        if (amountIn === this.amountOutPrevious)
           // TODO: accuracy?
           gas = -this.GasConsumption
         if (amountIn < this.amountOutPrevious) {
@@ -63,7 +62,7 @@ class Edge {
   }
 
   checkMinimalLiquidityExceededAfterSwap(from: Vertice, amountOut: number): boolean {
-    if (from == this.vert0) {
+    if (from === this.vert0) {
       const r1 = parseInt(this.pool.reserve1.toString())
       if (this.direction) {
         return r1 - amountOut - this.amountOutPrevious < this.MINIMUM_LIQUIDITY
@@ -86,8 +85,8 @@ class Edge {
     const outPrev = this.direction ? this.amountOutPrevious : -this.amountInPrevious
     const to = from.getNeibour(this)
     if (to) {
-      const inInc = from == this.vert0 ? from.bestIncome : -from.bestIncome
-      const outInc = from == this.vert0 ? to.bestIncome : -to.bestIncome
+      const inInc = from === this.vert0 ? from.bestIncome : -from.bestIncome
+      const outInc = from === this.vert0 ? to.bestIncome : -to.bestIncome
       const inNew = inPrev + inInc
       const outNew = outPrev + outInc
       console.assert(inNew * outNew >= 0)
@@ -137,7 +136,7 @@ class Vertice {
 
   getNeibour(e?: Edge) {
     if (!e) return
-    return e.vert0 == this ? e.vert1 : e.vert0
+    return e.vert0 === this ? e.vert1 : e.vert0
   }
 }
 
@@ -169,10 +168,10 @@ class Graph {
     from.price = price
     from.gasPrice = gasPrice
     from.edges.forEach(e => {
-      const v = e.vert0 == from ? e.vert1 : e.vert0
+      const v = e.vert0 === from ? e.vert1 : e.vert0
       if (v.price !== 0) return
       let p = calcPrice(e.pool, 0)
-      if (from == e.vert1) p = 1 / p
+      if (from === e.vert1) p = 1 / p
       this.setPrices(v, price * p, gasPrice * p)
     })
   }
@@ -226,7 +225,7 @@ class Graph {
       })
 
       if (!closestVert) return
-      if (closestVert == finish) {
+      if (closestVert === finish) {
         const bestPath = []
         for (let v: Vertice | undefined = finish; v?.bestSource; v = v.getNeibour(v.bestSource)) {
           bestPath.unshift(v.bestSource)
@@ -241,9 +240,15 @@ class Graph {
       nextVertList.splice(closestPosition, 1)
 
       closestVert.edges.forEach(e => {
-        const v2 = closestVert == e.vert0 ? e.vert1 : e.vert0
+        const v2 = closestVert === e.vert0 ? e.vert1 : e.vert0
         if (processedVert.has(v2)) return
-        const [newIncome, gas] = e.calcOutput(closestVert as Vertice, (closestVert as Vertice).bestIncome)
+        let newIncome, gas
+        try {
+          ;[newIncome, gas] = e.calcOutput(closestVert as Vertice, (closestVert as Vertice).bestIncome)
+        } catch (e) {
+          // Any arithmetic error or out-of-liquidity
+          return
+        }
         // TODO: to test !!!!!!!!!!!!!!!!!!!!!!!!!!!!
         if (e.checkMinimalLiquidityExceededAfterSwap(closestVert as Vertice, newIncome)) return
         const newGasSpent = (closestVert as Vertice).gasSpent + gas
@@ -274,7 +279,7 @@ class Graph {
     })
   }
 
-  findBestRoute(from: RToken, to: RToken, amountIn: number, steps = 100): MultiRoute | undefined {
+  findBestRoute(from: RToken, to: RToken, amountIn: number, steps = 100): MultiRoute {
     this.edges.forEach(e => {
       e.amountInPrevious = 0
       e.amountOutPrevious = 0
@@ -283,10 +288,11 @@ class Graph {
     let output = 0
     let gasSpent = 0
     let totalOutput = 0
-    for (let step = 0; step < steps; ++step) {
+    let step
+    for (step = 0; step < steps; ++step) {
       const p = this.findBestPath(from, to, amountIn / steps)
       if (!p) {
-        return
+        break
       } else {
         //console.log(step, totalOutput, p.gasSpent, p.output);
         output += p.output
@@ -295,8 +301,14 @@ class Graph {
         this.addPath(this.tokens.get(from), p.path)
       }
     }
+    let status
+    if (step === 0) status = RouteStatus.NoWay
+    else if (step < steps) status = RouteStatus.Partial
+    else status = RouteStatus.Success
+
     return {
-      amountIn,
+      status,
+      amountIn: (amountIn / steps) * step,
       amountOut: output,
       legs: this.getRouteLegs(),
       gasSpent: gasSpent,
@@ -313,7 +325,7 @@ class Graph {
           const from = this.edgeFrom(e)
           return from ? [e, from[0], from[1]] : [e]
         })
-        .filter(e => e[1] == n)
+        .filter(e => e[1] === n)
 
       let outAmount = outEdges.reduce((a, b) => a + (b[2] as number), 0)
       if (outAmount <= 0) return
@@ -321,7 +333,7 @@ class Graph {
       const total = outAmount
       outEdges.forEach((e, i) => {
         const p = e[2] as number
-        const quantity = i + 1 == outEdges.length ? 1 : p / outAmount
+        const quantity = i + 1 === outEdges.length ? 1 : p / outAmount
         legs.push({
           address: (e[0] as Edge).pool.address,
           token: n.token,
@@ -336,7 +348,7 @@ class Graph {
   }
 
   edgeFrom(e: Edge): [Vertice, number] | undefined {
-    if (e.amountInPrevious == 0) return undefined
+    if (e.amountInPrevious === 0) return undefined
     return e.direction ? [e.vert0, e.amountInPrevious] : [e.vert1, e.amountOutPrevious]
   }
 
@@ -344,7 +356,7 @@ class Graph {
     return v.edges.filter(e => {
       const from = this.edgeFrom(e)
       if (from === undefined) return false
-      return from[0] == v
+      return from[0] === v
     })
   }
 
@@ -353,7 +365,7 @@ class Graph {
     this.vertices.forEach(v => nodes.set(v.token.name, v))
     const sortOp = new TopologicalSort(nodes)
     this.edges.forEach(e => {
-      if (e.amountInPrevious == 0) return
+      if (e.amountInPrevious === 0) return
       if (e.direction) sortOp.addEdge(e.vert0.token.name, e.vert1.token.name)
       else sortOp.addEdge(e.vert1.token.name, e.vert0.token.name)
     })
