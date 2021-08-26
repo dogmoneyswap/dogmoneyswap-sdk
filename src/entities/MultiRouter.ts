@@ -33,23 +33,21 @@ class Edge {
         } else {
           out = calcOutByIn(pool, amountIn - this.amountOutPrevious, false) + this.amountInPrevious
         }
-        if (amountIn === this.amountOutPrevious)
+        if (amountIn === this.amountOutPrevious) {
           // TODO: accuracy?
           gas = -this.GasConsumption
+        }
       } else {
         out = calcOutByIn(pool, this.amountOutPrevious + amountIn, false) - this.amountInPrevious
-        const price = this.vert1.price / this.vert0.price
-        console.assert(out < amountIn / price && out >= 0)
       }
     } else {
       if (this.direction) {
         out = calcOutByIn(pool, this.amountInPrevious + amountIn, true) - this.amountOutPrevious
-        const price = this.vert1.price / this.vert0.price
-        console.assert(out < amountIn * price && out >= 0)
       } else {
-        if (amountIn === this.amountOutPrevious)
+        if (amountIn === this.amountOutPrevious) {
           // TODO: accuracy?
           gas = -this.GasConsumption
+        }
         if (amountIn < this.amountOutPrevious) {
           out = this.amountInPrevious - calcInByOut(pool, this.amountOutPrevious - amountIn, true)
         } else {
@@ -254,7 +252,6 @@ class Graph {
         const newGasSpent = (closestVert as Vertice).gasSpent + gas
         const price = finish.price / v2.price
         const newTotal = newIncome * price - newGasSpent * finish.gasPrice
-        //console.log(newIncome, gas, newTotal);
 
         if (!v2.bestSource) nextVertList.push(v2)
         if (!v2.bestSource || newTotal > v2.bestTotal) {
@@ -268,15 +265,41 @@ class Graph {
     }
   }
 
-  addPath(from: Vertice | undefined, path: Edge[]) {
+  addPath(from: Vertice | undefined, to: Vertice | undefined, path: Edge[]) {
+    let _from = from
     path.forEach(e => {
-      if (from) {
-        e.applySwap(from)
-        from = from.getNeibour(e)
+      if (_from) {
+        e.applySwap(_from)
+        _from = _from.getNeibour(e)
       } else {
         console.error('Unexpected 315')
       }
     })
+
+    ASSERT(() => {
+      const res = this.vertices.every(v => {
+        let total = 0
+        v.edges.forEach(e => {
+          if (e.vert0 === v) {
+            if (e.direction) {
+              total -= e.amountInPrevious
+            } else {
+              total += e.amountInPrevious
+            }
+          } else {
+            if (e.direction) {
+              total += e.amountOutPrevious
+            } else {
+              total -= e.amountOutPrevious
+            }
+          }
+        })
+        if (v === from) return total <= 0
+        if (v === to) return total >= 0
+        return Math.abs(total) < 1e10
+      })
+      return res
+    }, 'Error 290')
   }
 
   findBestRoute(from: RToken, to: RToken, amountIn: number, steps = 100): MultiRoute {
@@ -294,11 +317,10 @@ class Graph {
       if (!p) {
         break
       } else {
-        //console.log(step, totalOutput, p.gasSpent, p.output);
         output += p.output
         gasSpent += p.gasSpent
         totalOutput += p.totalOutput
-        this.addPath(this.tokens.get(from), p.path)
+        this.addPath(this.tokens.get(from), this.tokens.get(to), p.path)
       }
     }
     let status

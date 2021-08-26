@@ -25,11 +25,11 @@ function getPool(t0: number, t1: number, reserve: number, fee = 0.003, imbalance
   })
 }
 
-const testPool0_1 = getPool(0, 1, 1_000_000)
-const testPool0_2 = getPool(0, 2, 1_00_000)
-const testPool1_2 = getPool(1, 2, 1_000_000)
-const testPool1_3 = getPool(1, 3, 1_00_000)
-const testPool2_3 = getPool(2, 3, 1_000_000)
+const testPool0_1 = getPool(0, 1, 1_500_0)
+const testPool0_2 = getPool(0, 2, 1_000_0)
+const testPool1_2 = getPool(1, 2, 1_000_000_000)
+const testPool1_3 = getPool(1, 3, 1_000_0)
+const testPool2_3 = getPool(2, 3, 1_500_0)
 
 const testPools = [testPool0_1, testPool0_2, testPool1_3, testPool2_3, testPool1_2]
 
