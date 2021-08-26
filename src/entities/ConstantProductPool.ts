@@ -183,7 +183,6 @@ export class ConstantProductPool {
     token: Token,
     totalSupply: CurrencyAmount<Token>,
     liquidity: CurrencyAmount<Token>,
-    feeOn: boolean = false,
     kLast?: BigintIsh
   ): CurrencyAmount<Token> {
     invariant(this.involvesToken(token), 'TOKEN')
@@ -192,25 +191,22 @@ export class ConstantProductPool {
     invariant(JSBI.lessThanOrEqual(liquidity.quotient, totalSupply.quotient), 'LIQUIDITY')
 
     let totalSupplyAdjusted: CurrencyAmount<Token>
-    if (!feeOn) {
-      totalSupplyAdjusted = totalSupply
-    } else {
-      invariant(!!kLast, 'K_LAST')
-      const kLastParsed = JSBI.BigInt(kLast)
-      if (!JSBI.equal(kLastParsed, ZERO)) {
-        const rootK = sqrt(JSBI.multiply(this.reserve0.quotient, this.reserve1.quotient))
-        const rootKLast = sqrt(kLastParsed)
-        if (JSBI.greaterThan(rootK, rootKLast)) {
-          const numerator = JSBI.multiply(totalSupply.quotient, JSBI.subtract(rootK, rootKLast))
-          const denominator = JSBI.add(JSBI.multiply(rootK, FIVE), rootKLast)
-          const feeLiquidity = JSBI.divide(numerator, denominator)
-          totalSupplyAdjusted = totalSupply.add(CurrencyAmount.fromRawAmount(this.liquidityToken, feeLiquidity))
-        } else {
-          totalSupplyAdjusted = totalSupply
-        }
+
+    invariant(!!kLast, 'K_LAST')
+    const kLastParsed = JSBI.BigInt(kLast)
+    if (!JSBI.equal(kLastParsed, ZERO)) {
+      const rootK = sqrt(JSBI.multiply(this.reserve0.quotient, this.reserve1.quotient))
+      const rootKLast = sqrt(kLastParsed)
+      if (JSBI.greaterThan(rootK, rootKLast)) {
+        const numerator = JSBI.multiply(totalSupply.quotient, JSBI.subtract(rootK, rootKLast))
+        const denominator = JSBI.add(JSBI.multiply(rootK, FIVE), rootKLast)
+        const feeLiquidity = JSBI.divide(numerator, denominator)
+        totalSupplyAdjusted = totalSupply.add(CurrencyAmount.fromRawAmount(this.liquidityToken, feeLiquidity))
       } else {
         totalSupplyAdjusted = totalSupply
       }
+    } else {
+      totalSupplyAdjusted = totalSupply
     }
 
     return CurrencyAmount.fromRawAmount(

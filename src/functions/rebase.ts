@@ -1,9 +1,5 @@
 import { BigNumber } from '@ethersproject/bignumber'
-
-interface Rebase {
-  base: BigNumber
-  elastic: BigNumber
-}
+import { Rebase } from '../interfaces'
 
 export function rebase(value: BigNumber, from: BigNumber, to: BigNumber): BigNumber {
   return from ? value.mul(to).div(from) : BigNumber.from(0)
