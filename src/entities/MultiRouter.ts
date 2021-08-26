@@ -83,8 +83,8 @@ class Edge {
     const outPrev = this.direction ? this.amountOutPrevious : -this.amountInPrevious
     const to = from.getNeibour(this)
     if (to) {
-      const inInc = from === this.vert0 ? from.bestIncome : -from.bestIncome
-      const outInc = from === this.vert0 ? to.bestIncome : -to.bestIncome
+      const inInc = from === this.vert0 ? from.bestIncome : -to.bestIncome
+      const outInc = from === this.vert0 ? to.bestIncome : -from.bestIncome
       const inNew = inPrev + inInc
       const outNew = outPrev + outInc
       console.assert(inNew * outNew >= 0)
@@ -403,13 +403,14 @@ export function findMultiRouting(
   amountIn: number,
   pools: Pool[],
   baseToken: RToken,
-  gasPrice: number
+  gasPrice: number,
+  steps = 100
 ): MultiRoute | undefined {
   const g = new Graph(pools, baseToken, gasPrice)
   const fromV = g.tokens.get(from)
   if (fromV?.price === 0) {
     g.setPrices(fromV, 1, 0)
   }
-  const out = g.findBestRoute(from, to, amountIn)
+  const out = g.findBestRoute(from, to, amountIn, steps)
   return out
 }

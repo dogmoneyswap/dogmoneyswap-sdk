@@ -35,7 +35,7 @@ const testPools = [testPool0_1, testPool0_2, testPool1_3, testPool2_3, testPool1
 
 describe('Multirouting for bridge topology', () => {
   it('works correct', () => {
-    const res = findMultiRouting(tokens[0], tokens[3], 10000, testPools, tokens[2], gasPrice)
+    const res = findMultiRouting(tokens[0], tokens[3], 10000, testPools, tokens[2], gasPrice, 100)
 
     expect(res).toBeDefined()
     expect(res?.status).toEqual(RouteStatus.Success)
@@ -57,5 +57,16 @@ describe('Multirouting for bridge topology', () => {
 
     expect(res).toBeDefined()
     expect(res?.status).toEqual(RouteStatus.NoWay)
+  })
+
+  it('Varios step number check', () => {
+    const steps = [1, 2, 3, 5, 10, 30, 100, 300, 1000]
+    steps.forEach(s => {
+      const res = findMultiRouting(tokens[0], tokens[3], 10000, testPools, tokens[2], gasPrice, s)
+      //console.log(s, res?.amountOut);
+      expect(res).toBeDefined()
+      expect(res?.status).toEqual(RouteStatus.Success)
+      expect(res?.legs[res.legs.length - 1].swapPortion).toEqual(1)
+    })
   })
 })
