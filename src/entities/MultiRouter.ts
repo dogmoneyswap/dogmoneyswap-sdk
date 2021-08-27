@@ -29,7 +29,7 @@ class Edge {
     if (v === this.vert1) {
       if (this.direction) {
         if (amountIn < this.amountOutPrevious) {
-          out = this.amountInPrevious - calcInByOut(pool, this.amountOutPrevious - amountIn, false)
+          out = this.amountInPrevious - calcInByOut(pool, this.amountOutPrevious - amountIn, true)
         } else {
           out = calcOutByIn(pool, amountIn - this.amountOutPrevious, false) + this.amountInPrevious
         }
@@ -44,17 +44,19 @@ class Edge {
       if (this.direction) {
         out = calcOutByIn(pool, this.amountInPrevious + amountIn, true) - this.amountOutPrevious
       } else {
-        if (amountIn === this.amountOutPrevious) {
+        if (amountIn === this.amountInPrevious) {
           // TODO: accuracy?
           gas = -this.GasConsumption
         }
-        if (amountIn < this.amountOutPrevious) {
-          out = this.amountInPrevious - calcInByOut(pool, this.amountOutPrevious - amountIn, true)
+        if (amountIn < this.amountInPrevious) {
+          out = this.amountOutPrevious - calcInByOut(pool, this.amountInPrevious - amountIn, false)
         } else {
-          out = calcOutByIn(pool, amountIn - this.amountOutPrevious, true) + this.amountInPrevious
+          out = calcOutByIn(pool, amountIn - this.amountInPrevious, true) + this.amountOutPrevious
         }
       }
     }
+
+    // this.testApply(v, amountIn, out);
 
     return [out, gas]
   }
@@ -77,10 +79,49 @@ class Edge {
     }
   }
 
+  testApply(from: Vertice, amountIn: number, amountOut: number) {
+    console.assert(this.amountInPrevious * this.amountOutPrevious >= 0)
+    const inPrev = this.direction ? this.amountInPrevious : -this.amountInPrevious
+    const outPrev = this.direction ? this.amountOutPrevious : -this.amountOutPrevious
+    const to = from.getNeibour(this)
+    let directionNew,
+      amountInNew = 0,
+      amountOutNew = 0
+    if (to) {
+      const inInc = from === this.vert0 ? amountIn : -amountOut
+      const outInc = from === this.vert0 ? amountOut : -amountIn
+      const inNew = inPrev + inInc
+      const outNew = outPrev + outInc
+      if (inNew * outNew < 0) console.log('333')
+      console.assert(inNew * outNew >= 0)
+      if (inNew >= 0) {
+        directionNew = true
+        amountInNew = inNew
+        amountOutNew = outNew
+      } else {
+        directionNew = false
+        amountInNew = -inNew
+        amountOutNew = -outNew
+      }
+    } else console.error('Error 221')
+
+    if (directionNew) {
+      const calc = calcOutByIn(this.pool, amountInNew, directionNew)
+      const res = closeValues(amountOutNew, calc, 1e-6)
+      if (!res) console.log('Err 225-1 !!', amountOutNew, calc, Math.abs(calc / amountOutNew - 1))
+      return res
+    } else {
+      const calc = calcOutByIn(this.pool, amountOutNew, directionNew)
+      const res = closeValues(amountInNew, calc, 1e-6)
+      if (!res) console.log('Err 225-2!!', amountInNew, calc, Math.abs(calc / amountInNew - 1))
+      return res
+    }
+  }
+
   applySwap(from: Vertice) {
     console.assert(this.amountInPrevious * this.amountOutPrevious >= 0)
-    const inPrev = this.direction ? this.amountInPrevious : -this.amountOutPrevious
-    const outPrev = this.direction ? this.amountOutPrevious : -this.amountInPrevious
+    const inPrev = this.direction ? this.amountInPrevious : -this.amountInPrevious
+    const outPrev = this.direction ? this.amountOutPrevious : -this.amountOutPrevious
     const to = from.getNeibour(this)
     if (to) {
       const inInc = from === this.vert0 ? from.bestIncome : -to.bestIncome
@@ -94,8 +135,8 @@ class Edge {
         this.amountOutPrevious = outNew
       } else {
         this.direction = false
-        this.amountInPrevious = -outNew
-        this.amountOutPrevious = -inNew
+        this.amountInPrevious = -inNew
+        this.amountOutPrevious = -outNew
       }
     } else console.error('Error 221')
 
