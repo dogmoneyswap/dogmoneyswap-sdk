@@ -51,7 +51,6 @@ const testPools2 = [testPool0_1_2, testPool0_2_2, testPool1_3_2, testPool2_3_2, 
 
 describe('Multirouting for bridge topology', () => {
   it('works correct for equal prices', () => {
-    debugger
     const res = findMultiRouting(tokens[0], tokens[3], 10000, testPools, tokens[2], gasPrice, 100)
 
     expect(res).toBeDefined()
@@ -74,6 +73,16 @@ describe('Multirouting for bridge topology', () => {
 
     expect(res).toBeDefined()
     expect(res?.status).toEqual(RouteStatus.NoWay)
+  })
+
+  it('partial routing', () => {
+    // Try to route too big value => all pools achive min liquidity => no routing any more
+    const res = findMultiRouting(tokens[0], tokens[3], 1000000, testPools, tokens[2], gasPrice, 100)
+
+    expect(res).toBeDefined()
+    expect(res?.status).toEqual(RouteStatus.Partial)
+    expect(res?.legs.length).toEqual(testPools.length)
+    expect(res?.legs[res.legs.length - 1].swapPortion).toEqual(1)
   })
 
   it('Varios step number check', () => {
