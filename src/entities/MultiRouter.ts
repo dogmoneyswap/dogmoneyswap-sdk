@@ -343,7 +343,15 @@ class Graph {
     }, 'Error 290')
   }
 
-  findBestRoute(from: RToken, to: RToken, amountIn: number, steps = 100): MultiRoute {
+  findBestRoute(from: RToken, to: RToken, amountIn: number, mode: number | number[]): MultiRoute {
+    let routeValues = []
+    if (Array.isArray(mode)) {
+      const sum = mode.reduce((a, b) => a + b, 0)
+      routeValues = mode.map(e => e / sum)
+    } else {
+      for (let i = 0; i < mode; ++i) routeValues.push(1 / mode)
+    }
+
     this.edges.forEach(e => {
       e.amountInPrevious = 0
       e.amountOutPrevious = 0
@@ -352,9 +360,10 @@ class Graph {
     let output = 0
     let gasSpent = 0
     let totalOutput = 0
+    let totalrouted = 0
     let step
-    for (step = 0; step < steps; ++step) {
-      const p = this.findBestPath(from, to, amountIn / steps)
+    for (step = 0; step < routeValues.length; ++step) {
+      const p = this.findBestPath(from, to, amountIn * routeValues[step])
       if (!p) {
         break
       } else {
@@ -362,16 +371,17 @@ class Graph {
         gasSpent += p.gasSpent
         totalOutput += p.totalOutput
         this.addPath(this.tokens.get(from), this.tokens.get(to), p.path)
+        totalrouted += routeValues[step]
       }
     }
     let status
     if (step === 0) status = RouteStatus.NoWay
-    else if (step < steps) status = RouteStatus.Partial
+    else if (step < routeValues.length) status = RouteStatus.Partial
     else status = RouteStatus.Success
 
     return {
       status,
-      amountIn: (amountIn / steps) * step,
+      amountIn: amountIn * totalrouted,
       amountOut: output,
       legs: this.getRouteLegs(),
       gasSpent: gasSpent,
@@ -445,7 +455,7 @@ export function findMultiRouting(
   pools: Pool[],
   baseToken: RToken,
   gasPrice: number,
-  steps = 100
+  steps: number | number[]
 ): MultiRoute | undefined {
   const g = new Graph(pools, baseToken, gasPrice)
   const fromV = g.tokens.get(from)

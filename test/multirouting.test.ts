@@ -60,7 +60,7 @@ describe('Multirouting for bridge topology', () => {
   })
 
   it('unknown gas price', () => {
-    const res = findMultiRouting(tokens[0], tokens[3], 20000, testPools, tokens[4], gasPrice)
+    const res = findMultiRouting(tokens[0], tokens[3], 20000, testPools, tokens[4], gasPrice, 100)
 
     expect(res).toBeDefined()
     expect(res?.status).toEqual(RouteStatus.Success)
@@ -69,7 +69,7 @@ describe('Multirouting for bridge topology', () => {
   })
 
   it('not connected tokens', () => {
-    const res = findMultiRouting(tokens[0], tokens[4], 20000, testPools, tokens[2], gasPrice)
+    const res = findMultiRouting(tokens[0], tokens[4], 20000, testPools, tokens[2], gasPrice, 100)
 
     expect(res).toBeDefined()
     expect(res?.status).toEqual(RouteStatus.NoWay)
@@ -82,6 +82,26 @@ describe('Multirouting for bridge topology', () => {
     expect(res).toBeDefined()
     expect(res?.status).toEqual(RouteStatus.Partial)
     expect(res?.legs.length).toEqual(testPools.length)
+    expect(res?.legs[res.legs.length - 1].swapPortion).toEqual(1)
+  })
+
+  it('Special case for _one_line_ coverage', () => {
+    const res = findMultiRouting(tokens[0], tokens[3], 10000, testPools, tokens[2], gasPrice, [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      12
+    ])
+
+    expect(res).toBeDefined()
+    expect(res?.status).toEqual(RouteStatus.Success)
     expect(res?.legs[res.legs.length - 1].swapPortion).toEqual(1)
   })
 
