@@ -455,7 +455,7 @@ export function findMultiRouting(
   pools: Pool[],
   baseToken: RToken,
   gasPrice: number,
-  steps: number | number[]
+  steps: number | number[] = 12
 ): MultiRoute | undefined {
   const g = new Graph(pools, baseToken, gasPrice)
   const fromV = g.tokens.get(from)
