@@ -1,4 +1,17 @@
-import { Avalanche, Binance, Celo, Ether, Fantom, Harmony, Heco, Matic, Okex, Palm, xDai } from '../entities/Native'
+import {
+  Avalanche,
+  Binance,
+  Celo,
+  Ether,
+  Fantom,
+  Harmony,
+  Heco,
+  Matic,
+  Movr,
+  Okex,
+  Palm,
+  xDai
+} from '../entities/Native'
 
 import { ChainId } from '../enums'
 
@@ -25,5 +38,6 @@ export const NATIVE = {
   [ChainId.OKEX]: Okex.onChain(ChainId.OKEX),
   [ChainId.OKEX_TESTNET]: Okex.onChain(ChainId.OKEX_TESTNET),
   [ChainId.CELO]: Celo.onChain(ChainId.CELO),
-  [ChainId.PALM]: Palm.onChain(ChainId.PALM)
+  [ChainId.PALM]: Palm.onChain(ChainId.PALM),
+  [ChainId.MOONRIVER]: Movr.onChain(ChainId.MOONRIVER)
 }
