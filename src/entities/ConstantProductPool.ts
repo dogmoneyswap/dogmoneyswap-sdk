@@ -7,7 +7,7 @@ import { Fee } from '../enums'
 import JSBI from 'jsbi'
 import { Price } from './Price'
 import { Token } from './Token'
-import { computeConstantProductPoolAddress } from '../functions/computePoolAddress'
+import { computeConstantProductPoolAddress } from '../functions/computeConstantProductPoolAddress'
 import invariant from 'tiny-invariant'
 import { sqrt } from '../functions/sqrt'
 

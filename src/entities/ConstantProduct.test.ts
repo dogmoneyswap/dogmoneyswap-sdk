@@ -3,7 +3,7 @@ import { CurrencyAmount, Price, Token } from '.'
 import { ConstantProductPool } from './ConstantProductPool'
 import { InsufficientInputAmountError } from '../errors'
 import { WETH9 } from '../constants'
-import { computeConstantProductPoolAddress } from '../functions/computePoolAddress'
+import { computeConstantProductPoolAddress } from '../functions/computeConstantProductPoolAddress'
 
 describe('computePoolAddress', () => {
   it('should correctly compute the pool address', () => {
@@ -23,7 +23,7 @@ describe('computePoolAddress', () => {
       twap
     })
 
-    expect(result).toEqual('0x552fF34E4980aC63a26865236E507864F7C58512')
+    expect(result).toEqual('0x265C560bB05630701Eb49BF8cA427A674AaCb955')
   })
 })
 
@@ -45,7 +45,7 @@ describe('ConstantProductPool', () => {
 
   describe('#getAddress', () => {
     it('returns the correct address', () => {
-      expect(ConstantProductPool.getAddress(USDC, DAI)).toEqual('0x30D60C3A8929F8dD663A7B8314A0Ed9fD0Ef0e20')
+      expect(ConstantProductPool.getAddress(USDC, DAI)).toEqual('0x99871df1a759702b4015771Bc278F89c0C090F76')
     })
   })
 
