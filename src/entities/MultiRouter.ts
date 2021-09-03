@@ -179,7 +179,7 @@ class Vertice {
   }
 }
 
-class Graph {
+export class Graph {
   vertices: Vertice[]
   edges: Edge[]
   tokens: Map<RToken, Vertice>
@@ -210,7 +210,7 @@ class Graph {
       const v = e.vert0 === from ? e.vert1 : e.vert0
       if (v.price !== 0) return
       let p = calcPrice(e.pool, 0)
-      if (from === e.vert1) p = 1 / p
+      if (from === e.vert0) p = 1 / p
       this.setPrices(v, price * p, gasPrice * p)
     })
   }
