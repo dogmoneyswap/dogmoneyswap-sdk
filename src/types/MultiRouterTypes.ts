@@ -59,21 +59,18 @@ export class Pool {
 
 type PoolInfoNoType = Omit<PoolInfoWithDefaults, 'type'>
 
-export class ConstantProductPool extends Pool {
+export class RConstantProductPool extends Pool {
   constructor(info: PoolInfoNoType) {
     super({
       type: PoolType.ConstantProduct,
       ...info
     })
   }
-  // public static fromPool(pool: ConstantProductPool) {
-  //   return
-  // }
 }
 
 type HybridPoolInfo = PoolInfoNoType & { A: number }
 
-export class HybridPool extends Pool {
+export class RHybridPool extends Pool {
   A: number
   constructor(info: HybridPoolInfo) {
     super({
@@ -86,7 +83,7 @@ export class HybridPool extends Pool {
 
 type WeightedPoolInfo = PoolInfoNoType & { weight0: number; weight1: number }
 
-export class WeightedPool extends Pool {
+export class RWeightedPool extends Pool {
   weight0: number
   weight1: number
   constructor(info: WeightedPoolInfo) {
@@ -115,7 +112,7 @@ interface CLSpecific {
 
 type CLPoolInfo = Omit<PoolInfoNoType, 'reserve0' | 'reserve1'> & CLSpecific
 
-export class ConcentratedLiquidityPool extends Pool {
+export class RConcentratedLiquidityPool extends Pool {
   liquidity: number
   sqrtPrice: number
   nearestTick: number
