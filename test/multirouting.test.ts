@@ -1,6 +1,8 @@
+import { RConstantProductPool, RouteStatus } from '../src/types/MultiRouterTypes'
+
 import { BigNumber } from '@ethersproject/bignumber'
-import { ConstantProductPool, RouteStatus } from '../src/types/MultiRouterTypes'
 import { findMultiRouting } from '../src/entities/MultiRouter'
+
 const gasPrice = 1 * 200 * 1e-9
 
 // Bridge:
@@ -9,7 +11,7 @@ const gasPrice = 1 * 200 * 1e-9
 //   \2/
 
 function getPool(tokens: any, t0: number, t1: number, price: number[], reserve: number, fee = 0.003, imbalance = 0) {
-  return new ConstantProductPool({
+  return new RConstantProductPool({
     token0: tokens[t0],
     token1: tokens[t1],
     address: `pool-${t0}-${t1}-${reserve}-${fee}`,
