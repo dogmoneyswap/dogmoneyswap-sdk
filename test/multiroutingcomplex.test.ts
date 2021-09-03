@@ -1,7 +1,7 @@
 // @ts-ignore
 import seedrandom from 'seedrandom'
 import { /*findMultiRouting,*/ Graph } from '../src/entities/MultiRouter'
-import { ConstantProductPool, Pool, RToken } from '../src/types/MultiRouterTypes'
+import { RConstantProductPool, Pool, RToken } from '../src/types/MultiRouterTypes'
 import { getBigNumber } from '../src/utils/MultiRouterMath'
 
 const testSeed = '1' // Change it to change random generator values
@@ -120,7 +120,7 @@ function getCPPool(rnd: () => number, t0: RToken, t1: RToken, price: number) {
   console.assert(reserve0 >= MIN_LIQUIDITY && reserve0 <= MAX_LIQUIDITY, 'Error reserve0 clculation')
   console.assert(reserve1 >= MIN_LIQUIDITY && reserve1 <= MAX_LIQUIDITY, 'Error reserve1 clculation')
 
-  return new ConstantProductPool({
+  return new RConstantProductPool({
     token0: t0,
     token1: t1,
     address: `pool cp ${t0.name} ${t1.name} ${reserve0} ${price} ${fee}`,
