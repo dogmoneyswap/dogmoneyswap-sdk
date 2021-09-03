@@ -35,7 +35,7 @@ const testPool2_3 = getPool(tokens, 2, 3, price, 1_500_0)
 const testPools = [testPool0_1, testPool0_2, testPool1_3, testPool2_3, testPool1_2]
 
 // ======================= Env2 ===================
-const price2 = [1, 2, 10, 15, 0.01]
+const price2 = [1, 2, 2.2, 15, 0.01]
 const tokens2 = price2.map((_, i) => ({
   name: '' + (i + 1),
   address: 'abcd'
