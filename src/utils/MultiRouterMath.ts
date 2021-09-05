@@ -2,9 +2,9 @@ import { BigNumber } from '@ethersproject/bignumber'
 import {
   Pool,
   PoolType,
-  HybridPool,
-  WeightedPool,
-  ConcentratedLiquidityPool,
+  RHybridPool,
+  RWeightedPool,
+  RConcentratedLiquidityPool,
   CL_MIN_TICK,
   CL_MAX_TICK
 } from '../types/MultiRouterTypes'
@@ -12,7 +12,7 @@ import {
 const A_PRECISION = 100
 
 const DCacheBN = new Map<Pool, BigNumber>()
-export function HybridComputeLiquidity(pool: HybridPool): BigNumber {
+export function HybridComputeLiquidity(pool: RHybridPool): BigNumber {
   const res = DCacheBN.get(pool)
   if (res !== undefined) return res
 
@@ -61,7 +61,7 @@ export function HybridComputeLiquidity(pool: HybridPool): BigNumber {
   return D
 }
 
-export function HybridgetY(pool: HybridPool, x: BigNumber): BigNumber {
+export function HybridgetY(pool: RHybridPool, x: BigNumber): BigNumber {
   const D = HybridComputeLiquidity(pool)
 
   const nA = pool.A * 2
@@ -112,7 +112,7 @@ export function calcOutByIn(pool: Pool, amountIn: number, direction = true): num
     case PoolType.Weighted: {
       const x = parseInt(xBN.toString())
       const y = parseInt(yBN.toString())
-      const wPool = pool as WeightedPool
+      const wPool = pool as RWeightedPool
       const weightRatio = direction ? wPool.weight0 / wPool.weight1 : wPool.weight1 / wPool.weight0
       const actualIn = amountIn * (1 - pool.fee)
       const out = y * (1 - Math.pow(x / (x + actualIn), weightRatio))
@@ -124,20 +124,20 @@ export function calcOutByIn(pool: Pool, amountIn: number, direction = true): num
       // const dy = y - yNew;
 
       const xNewBN = xBN.add(getBigNumber(undefined, amountIn * (1 - pool.fee)))
-      const yNewBN = HybridgetY(pool as HybridPool, xNewBN)
+      const yNewBN = HybridgetY(pool as RHybridPool, xNewBN)
       const dy = parseInt(yBN.sub(yNewBN).toString())
 
       return dy
     }
     case PoolType.ConcentratedLiquidity: {
-      return ConcentratedLiquidityOutByIn(pool as ConcentratedLiquidityPool, amountIn, direction)
+      return ConcentratedLiquidityOutByIn(pool as RConcentratedLiquidityPool, amountIn, direction)
     }
   }
 }
 
 export class OutOfLiquidity extends Error {}
 
-function ConcentratedLiquidityOutByIn(pool: ConcentratedLiquidityPool, inAmount: number, direction: boolean) {
+function ConcentratedLiquidityOutByIn(pool: RConcentratedLiquidityPool, inAmount: number, direction: boolean) {
   if (pool.ticks.length === 0) return 0
   if (pool.ticks[0].index > CL_MIN_TICK) pool.ticks.unshift({ index: CL_MIN_TICK, DLiquidity: 0 })
   if (pool.ticks[pool.ticks.length - 1].index < CL_MAX_TICK) pool.ticks.push({ index: CL_MAX_TICK, DLiquidity: 0 })
@@ -214,7 +214,7 @@ export function calcInByOut(pool: Pool, amountOut: number, direction: boolean): 
     case PoolType.Weighted: {
       const x = parseInt(xBN.toString())
       const y = parseInt(yBN.toString())
-      const wPool = pool as WeightedPool
+      const wPool = pool as RWeightedPool
       const weightRatio = direction ? wPool.weight0 / wPool.weight1 : wPool.weight1 / wPool.weight0
       input = x * (1 - pool.fee) * (Math.pow(1 - amountOut / y, -weightRatio) - 1)
       break
@@ -225,7 +225,7 @@ export function calcInByOut(pool: Pool, amountOut: number, direction: boolean): 
         // lack of precision
         yNewBN = BigNumber.from(1)
 
-      const xNewBN = HybridgetY(pool as HybridPool, yNewBN)
+      const xNewBN = HybridgetY(pool as RHybridPool, yNewBN)
       input = Math.round(parseInt(xNewBN.sub(xBN).toString()) / (1 - pool.fee))
 
       // const yNew = y - amountOut;
@@ -256,13 +256,13 @@ export function calcPrice(pool: Pool, amountIn: number): number {
       return (r1 * x) / (x + amountIn) / (x + amountIn)
     }
     case PoolType.Weighted: {
-      const wPool = pool as WeightedPool
+      const wPool = pool as RWeightedPool
       const weightRatio = wPool.weight0 / wPool.weight1
       const x = r0 + amountIn * (1 - pool.fee)
       return (r1 * weightRatio * (1 - pool.fee) * Math.pow(r0 / x, weightRatio)) / x
     }
     case PoolType.Hybrid: {
-      const hPool = pool as HybridPool
+      const hPool = pool as RHybridPool
       const D = parseInt(HybridComputeLiquidity(hPool).toString())
       const A = hPool.A / A_PRECISION
       const x = r0 + amountIn
@@ -276,7 +276,7 @@ export function calcPrice(pool: Pool, amountIn: number): number {
   return 0
 }
 
-function calcInputByPriceConstantMean(pool: WeightedPool, price: number) {
+function calcInputByPriceConstantMean(pool: RWeightedPool, price: number) {
   const r0 = parseInt(pool.reserve0.toString())
   const r1 = parseInt(pool.reserve1.toString())
   const weightRatio = pool.weight0 / pool.weight1
@@ -294,7 +294,7 @@ export function calcInputByPrice(pool: Pool, priceEffective: number, hint = 1): 
       return res
     }
     case PoolType.Weighted: {
-      const res = calcInputByPriceConstantMean(pool as WeightedPool, priceEffective)
+      const res = calcInputByPriceConstantMean(pool as RWeightedPool, priceEffective)
       return res
     }
     case PoolType.Hybrid: {

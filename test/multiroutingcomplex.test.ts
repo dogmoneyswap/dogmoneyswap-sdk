@@ -1,7 +1,7 @@
 // @ts-ignore
 import seedrandom from 'seedrandom'
-import { /*findMultiRouting,*/ Graph } from '../src/entities/MultiRouter'
-import { RConstantProductPool, Pool, RToken } from '../src/types/MultiRouterTypes'
+import { findMultiRouting, Graph } from '../src/entities/MultiRouter'
+import { RConstantProductPool, Pool, RToken, MultiRoute, RouteStatus, RouteLeg } from '../src/types/MultiRouterTypes'
 import { getBigNumber } from '../src/utils/MultiRouterMath'
 
 const testSeed = '1' // Change it to change random generator values
@@ -26,14 +26,14 @@ interface Variants {
 function choice(rnd: () => number, obj: Variants) {
   let total = 0
   Object.entries(obj).forEach(([_, p]) => (total += p))
-  if (total <= 0) throw 'Error 62'
+  if (total <= 0) throw new Error('Error 62')
   const val = rnd() * total
   let past = 0
   for (let k in obj) {
     past += obj[k]
     if (past >= val) return k
   }
-  throw 'Error 70'
+  throw new Error('Error 70')
 }
 
 function getRandom(rnd: () => number, min: number, max: number) {
@@ -146,7 +146,7 @@ function createNetwork(rnd: () => number): Network {
   }
 
   const pools = []
-  for (var i = 0; i < TOKEN_NUMBER; ++i) {
+  for (i = 0; i < TOKEN_NUMBER; ++i) {
     for (var j = i + 1; j < TOKEN_NUMBER; ++j) {
       if (rnd() < POOL_CP_DENSITY) {
         pools.push(getCPPool(rnd, tokens[i], tokens[j], prices[i] / prices[j]))
@@ -166,6 +166,82 @@ function expectToBeClose(a: number, b: number, max: number) {
   expect(Math.abs(a / b - 1)).toBeLessThan(max)
 }
 
+function checkRoute(
+  network: Network,
+  from: RToken,
+  to: RToken,
+  amountIn: number,
+  baseToken: RToken,
+  gasPrice: number,
+  route: MultiRoute
+) {
+  // amountIn checks
+  if (route.status === RouteStatus.Success) expect(route.amountIn).toEqual(amountIn)
+  else if (route.status === RouteStatus.Partial) {
+    expect(route.amountIn).toBeLessThan(amountIn)
+    expect(route.amountIn).toBeGreaterThan(0)
+  }
+
+  // amountOut checks
+  if (route.status !== RouteStatus.NoWay) expect(route.amountOut).toBeGreaterThan(0)
+  const outPriceToIn = network.prices[parseInt(to.name)] / network.prices[parseInt(from.name)]
+  // Slippage is always not-negative
+  expect(route.amountOut).toBeLessThanOrEqual(route.amountIn * outPriceToIn)
+
+  // gasSpent checks
+  const poolMap = new Map<string, Pool>()
+  network.pools.forEach(p => poolMap.set(p.address, p))
+  const expectedGasSpent = route.legs.reduce((a, b) => a + (poolMap.get(b.address)?.swapGasCost as number), 0)
+  expect(route.gasSpent).toEqual(expectedGasSpent)
+
+  // totalAmountOut checks - assuming out token is always connected with the base token
+  const outPriceToBase = network.prices[parseInt(to.name)] / network.prices[parseInt(baseToken.name)]
+  const expectedTotalAmountOut = route.amountOut - (route.gasSpent * gasPrice) / outPriceToBase
+  expectToBeClose(route.totalAmountOut, expectedTotalAmountOut, 1e-10)
+
+  // legs checks
+  if (route.status !== RouteStatus.NoWay) expect(route.legs.length).toBeGreaterThan(0)
+  const usedPools = new Map<string, boolean>()
+  const usedTokens = new Map<RToken, RouteLeg[]>()
+  route.legs.forEach(l => {
+    expect(usedPools.get(l.address)).toBeUndefined()
+    usedPools.set(l.address, true)
+    const pool = poolMap.get(l.address) as Pool
+    usedTokens.set(pool.token0, usedTokens.get(pool.token0) || [])
+    usedTokens.get(pool.token0)?.push(l)
+    usedTokens.set(pool.token1, usedTokens.get(pool.token1) || [])
+    usedTokens.get(pool.token1)?.push(l)
+  })
+  usedTokens.forEach((legs, t) => {
+    if (t === from) {
+      expect(legs.length).toBeGreaterThan(0)
+      expect(legs.every(l => l.token === from)).toBeTruthy()
+      expect(legs[legs.length - 1].swapPortion).toEqual(1)
+    } else if (t === to) {
+      expect(legs.length).toBeGreaterThan(0)
+      expect(legs.some(l => l.token === to)).toBeFalsy()
+    } else {
+      expect(legs.length).toBeGreaterThanOrEqual(2)
+      expect(legs[0].token).not.toEqual(t)
+      expect(legs[legs.length - 1].token).toEqual(t)
+      expect(legs[legs.length - 1].swapPortion).toEqual(1)
+      let inputFlag = true
+      let absolutePortion = 0
+      legs.forEach(l => {
+        if (l.token !== t) {
+          expect(inputFlag).toBeTruthy()
+        } else {
+          inputFlag = false
+          absolutePortion += l.absolutePortion
+          expect(l.swapPortion).toBeGreaterThan(0)
+          expect(l.swapPortion).toBeLessThanOrEqual(1)
+        }
+      })
+      expectToBeClose(absolutePortion, 1, 1e-12)
+    }
+  })
+}
+
 it('Token price calculation is correct', () => {
   const network = createNetwork(rnd)
   const baseTokenIndex = 0
@@ -181,6 +257,15 @@ it('Token price calculation is correct', () => {
   })
 })
 
-// const res = findMultiRouting(network.tokens[0], network.tokens[3], 100000,
-//     network.pools, network.tokens[2], network.gasPrice)
-// console.log(res);
+it('Multirouter output is correct', () => {
+  const network = createNetwork(rnd)
+  const route = findMultiRouting(
+    network.tokens[0],
+    network.tokens[3],
+    1e20,
+    network.pools,
+    network.tokens[2],
+    network.gasPrice
+  )
+  checkRoute(network, network.tokens[0], network.tokens[3], 1e20, network.tokens[2], network.gasPrice, route)
+})

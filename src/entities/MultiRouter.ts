@@ -24,7 +24,7 @@ class Edge {
   }
 
   reserve(v: Vertice): BigNumber {
-    return v == this.vert0 ? this.pool.reserve0 : this.pool.reserve1
+    return v === this.vert0 ? this.pool.reserve0 : this.pool.reserve1
   }
 
   calcOutput(v: Vertice, amountIn: number) {
@@ -219,7 +219,7 @@ export class Graph {
       if (v.price !== 0) return
       let p = calcPrice(e.pool, 0)
       if (from === e.vert0) p = 1 / p
-      this.setPrices(v, price * p, gasPrice * p)
+      this.setPrices(v, price * p, gasPrice / p)
     })
   }
 
@@ -423,7 +423,7 @@ export class Graph {
         })
         outAmount -= p
       })
-      console.assert(Math.abs(outAmount) < 1e-6, 'Error 281')
+      console.assert(outAmount / total < 1e-12, 'Error 281')
     })
     return legs
   }
@@ -464,7 +464,7 @@ export function findMultiRouting(
   baseToken: RToken,
   gasPrice: number,
   steps: number | number[] = 12
-): MultiRoute | undefined {
+): MultiRoute {
   const g = new Graph(pools, baseToken, gasPrice)
   const fromV = g.tokens.get(from)
   if (fromV?.price === 0) {
