@@ -1,3 +1,4 @@
+import { BigNumber } from '@ethersproject/bignumber'
 import { Pool, RToken, RouteLeg, MultiRoute, RouteStatus } from '../types/MultiRouterTypes'
 import { ASSERT, calcInByOut, calcOutByIn, closeValues, calcPrice } from '../utils/MultiRouterMath'
 import TopologicalSort from '../utils/TopologicalSort'
@@ -20,6 +21,10 @@ class Edge {
     this.amountInPrevious = 0
     this.amountOutPrevious = 0
     this.direction = true
+  }
+
+  reserve(v: Vertice): BigNumber {
+    return v == this.vert0 ? this.pool.reserve0 : this.pool.reserve1
   }
 
   calcOutput(v: Vertice, amountIn: number) {
@@ -206,7 +211,10 @@ export class Graph {
     if (from.price !== 0) return
     from.price = price
     from.gasPrice = gasPrice
-    from.edges.forEach(e => {
+    const edges = from.edges
+      .map((e): [Edge, number] => [e, parseInt(e.reserve(from).toString())])
+      .sort(([_1, r1], [_2, r2]) => r2 - r1)
+    edges.forEach(([e, _]) => {
       const v = e.vert0 === from ? e.vert1 : e.vert0
       if (v.price !== 0) return
       let p = calcPrice(e.pool, 0)
