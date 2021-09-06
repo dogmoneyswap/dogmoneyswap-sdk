@@ -296,10 +296,9 @@ export class Graph {
           // Any arithmetic error or out-of-liquidity
           return
         }
-        // TODO: to test !!!!!!!!!!!!!!!!!!!!!!!!!!!!
         if (e.checkMinimalLiquidityExceededAfterSwap(closestVert as Vertice, newIncome)) return
         const newGasSpent = (closestVert as Vertice).gasSpent + gas
-        const price = finish.price / v2.price
+        const price = v2.price / finish.price
         const newTotal = newIncome * price - newGasSpent * finish.gasPrice
 
         if (!v2.bestSource) nextVertList.push(v2)
@@ -328,6 +327,7 @@ export class Graph {
     ASSERT(() => {
       const res = this.vertices.every(v => {
         let total = 0
+        let totalModule = 0
         v.edges.forEach(e => {
           if (e.vert0 === v) {
             if (e.direction) {
@@ -335,17 +335,20 @@ export class Graph {
             } else {
               total += e.amountInPrevious
             }
+            totalModule += e.amountInPrevious
           } else {
             if (e.direction) {
               total += e.amountOutPrevious
             } else {
               total -= e.amountOutPrevious
             }
+            totalModule += e.amountOutPrevious
           }
         })
         if (v === from) return total <= 0
         if (v === to) return total >= 0
-        return Math.abs(total) < 1e10
+        if (totalModule === 0) return total === 0
+        return Math.abs(total / totalModule) < 1e10
       })
       return res
     }, 'Error 290')
