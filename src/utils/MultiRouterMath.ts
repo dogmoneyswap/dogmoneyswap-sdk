@@ -247,19 +247,20 @@ export function calcInByOut(pool: Pool, amountOut: number, direction: boolean): 
   return input
 }
 
-export function calcPrice(pool: Pool, amountIn: number): number {
+export function calcPrice(pool: Pool, amountIn: number, takeFeeIntoAccount = true): number {
   const r0 = parseInt(pool.reserve0.toString())
   const r1 = parseInt(pool.reserve1.toString())
+  const oneMinusFee = takeFeeIntoAccount ? 1 - pool.fee : 1
   switch (pool.type) {
     case PoolType.ConstantProduct: {
-      const x = r0 / (1 - pool.fee)
+      const x = r0 / oneMinusFee
       return (r1 * x) / (x + amountIn) / (x + amountIn)
     }
     case PoolType.Weighted: {
       const wPool = pool as RWeightedPool
       const weightRatio = wPool.weight0 / wPool.weight1
-      const x = r0 + amountIn * (1 - pool.fee)
-      return (r1 * weightRatio * (1 - pool.fee) * Math.pow(r0 / x, weightRatio)) / x
+      const x = r0 + amountIn * oneMinusFee
+      return (r1 * weightRatio * oneMinusFee * Math.pow(r0 / x, weightRatio)) / x
     }
     case PoolType.Hybrid: {
       const hPool = pool as RHybridPool
@@ -269,7 +270,7 @@ export function calcPrice(pool: Pool, amountIn: number): number {
       const b = 4 * A * x + D - 4 * A * D
       const ac4 = (D * D * D) / x
       const Ds = Math.sqrt(b * b + 4 * A * ac4)
-      const res = (0.5 - (2 * b - ac4 / x) / Ds / 4) * (1 - pool.fee)
+      const res = (0.5 - (2 * b - ac4 / x) / Ds / 4) * oneMinusFee
       return res
     }
   }

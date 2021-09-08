@@ -13,6 +13,7 @@ class Edge {
   direction: boolean
   amountInPrevious: number // How many liquidity were passed from vert0 to vert1
   amountOutPrevious: number // How many liquidity were passed from vert0 to vert1
+  bestEdgeIncome: number // debug data
 
   constructor(p: Pool, v0: Vertice, v1: Vertice) {
     this.pool = p
@@ -21,6 +22,7 @@ class Edge {
     this.amountInPrevious = 0
     this.amountOutPrevious = 0
     this.direction = true
+    this.bestEdgeIncome = 0
   }
 
   reserve(v: Vertice): BigNumber {
@@ -84,6 +86,7 @@ class Edge {
     }
   }
 
+  // doesn't used in production - just for testing
   testApply(from: Vertice, amountIn: number, amountOut: number) {
     console.assert(this.amountInPrevious * this.amountOutPrevious >= 0)
     const inPrev = this.direction ? this.amountInPrevious : -this.amountInPrevious
@@ -166,6 +169,7 @@ class Vertice {
   gasSpent: number // temp data used for findBestPath algorithm
   bestTotal: number // temp data used for findBestPath algorithm
   bestSource?: Edge // temp data used for findBestPath algorithm
+  checkLine: number // debug data
 
   constructor(t: RToken) {
     this.token = t
@@ -176,6 +180,7 @@ class Vertice {
     this.gasSpent = 0
     this.bestTotal = 0
     this.bestSource = undefined
+    this.checkLine = -1
   }
 
   getNeibour(e?: Edge) {
@@ -217,7 +222,7 @@ export class Graph {
     edges.forEach(([e, _]) => {
       const v = e.vert0 === from ? e.vert1 : e.vert0
       if (v.price !== 0) return
-      let p = calcPrice(e.pool, 0)
+      let p = calcPrice(e.pool, 0, false)
       if (from === e.vert0) p = 1 / p
       this.setPrices(v, price * p, gasPrice / p)
     })
@@ -230,6 +235,77 @@ export class Graph {
     this.vertices.push(vert)
     this.tokens.set(token, vert)
     return vert
+  }
+
+  exportPath(from: RToken, to: RToken) {
+    //}, _route: MultiRoute) {
+    // const allPools = new Map<string, Pool>();
+    // this.edges.forEach(p => allPools.set(p.address, p));
+    // const usedPools = new Map<string, boolean>();
+    // route.legs.forEach(l => usedPools.set(l.address, l.token === allPools.get(l.address)?.token0))
+
+    const fromVert = this.tokens.get(from) as Vertice
+    const toVert = this.tokens.get(to) as Vertice
+    const initValue = (fromVert.bestIncome * fromVert.price) / toVert.price
+
+    const route = new Set<Edge>()
+    for (let v = toVert; v !== fromVert; v = v.getNeibour(v.bestSource) as Vertice) {
+      if (v.bestSource) route.add(v.bestSource)
+    }
+
+    function edgeStyle(e: Edge) {
+      const finish = e.vert1.bestSource === e
+      const start = e.vert0.bestSource === e
+      let label
+      if (e.bestEdgeIncome == -1) label = 'label: "low_liq"'
+      if (e.bestEdgeIncome !== 0) label = `label: "${print((e.bestEdgeIncome / initValue - 1) * 100, 3)}%"`
+      const edgeValue = route.has(e) ? 'value: 2' : undefined
+      let arrow
+      if (finish && start) arrow = 'arrows: "from,to"'
+      if (finish) arrow = 'arrows: "to"'
+      if (start) arrow = 'arrows: "from"'
+      return ['', label, edgeValue, arrow].filter(a => a !== undefined).join(', ')
+    }
+
+    function print(n: number, digits: number) {
+      let out
+      if (n === 0) out = '0'
+      else {
+        const n0 = n > 0 ? n : -n
+        const shift = digits - Math.ceil(Math.log(n0) / Math.LN10)
+        if (shift <= 0) out = `${Math.round(n0)}`
+        else {
+          const mult = Math.pow(10, shift)
+          out = `${Math.round(n0 * mult) / mult}`
+        }
+        if (n < 0) out = -out
+      }
+      return out
+    }
+
+    function nodeLabel(v: Vertice) {
+      const value = (v.bestIncome * v.price) / toVert.price
+      const income = `${print(value, 3)}`
+      const total = `${print(v.bestTotal, 3)}`
+      // const income = `${print((value/initValue-1)*100, 3)}%`
+      // const total = `${print((v.bestTotal/initValue-1)*100, 3)}%`
+      const checkLine = v.checkLine == -1 ? undefined : `${v.checkLine}`
+      return [checkLine, income, total].filter(a => a !== undefined).join(':')
+    }
+
+    const nodes = `var nodes = new vis.DataSet([
+      ${this.vertices.map(t => `{ id: ${t.token.name}, label: "${nodeLabel(t)}"}`).join(',\n\t\t')}
+    ]);\n`
+    const edges = `var edges = new vis.DataSet([
+      ${this.edges.map(p => `{ from: ${p.vert0.token.name}, to: ${p.vert1.token.name}${edgeStyle(p)}}`).join(',\n\t\t')}
+    ]);\n`
+    const data = `var data = {
+        nodes: nodes,
+        edges: edges,
+    };\n`
+
+    const fs = require('fs')
+    fs.writeFileSync('D:/Info/Notes/GraphVisualization/data.js', nodes + edges + data)
   }
 
   findBestPath(
@@ -248,17 +324,20 @@ export class Graph {
     const finish = this.tokens.get(to)
     if (!start || !finish) return
 
+    this.edges.forEach(e => (e.bestEdgeIncome = 0))
     this.vertices.forEach(v => {
       v.bestIncome = 0
       v.gasSpent = 0
       v.bestTotal = 0
       v.bestSource = undefined
+      v.checkLine = -1
     })
     start.bestIncome = amountIn
     start.bestTotal = amountIn
     const processedVert = new Set<Vertice>()
     const nextVertList = [start] // TODO: Use sorted Set!
 
+    let checkLine = 0
     for (;;) {
       let closestVert: Vertice | undefined
       let closestTotal = -1
@@ -272,6 +351,9 @@ export class Graph {
       })
 
       if (!closestVert) return
+
+      closestVert.checkLine = checkLine++
+
       if (closestVert === finish) {
         const bestPath = []
         for (let v: Vertice | undefined = finish; v?.bestSource; v = v.getNeibour(v.bestSource)) {
@@ -296,10 +378,16 @@ export class Graph {
           // Any arithmetic error or out-of-liquidity
           return
         }
-        if (e.checkMinimalLiquidityExceededAfterSwap(closestVert as Vertice, newIncome)) return
+        if (e.checkMinimalLiquidityExceededAfterSwap(closestVert as Vertice, newIncome)) {
+          e.bestEdgeIncome = -1
+          return
+        }
         const newGasSpent = (closestVert as Vertice).gasSpent + gas
         const price = v2.price / finish.price
         const newTotal = newIncome * price - newGasSpent * finish.gasPrice
+
+        console.assert(e.bestEdgeIncome === 0, 'Error 373')
+        e.bestEdgeIncome = newIncome * price
 
         if (!v2.bestSource) nextVertList.push(v2)
         if (!v2.bestSource || newTotal > v2.bestTotal) {

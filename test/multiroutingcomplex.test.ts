@@ -4,7 +4,7 @@ import { findMultiRouting, Graph } from '../src/entities/MultiRouter'
 import { RConstantProductPool, Pool, RToken, MultiRoute, RouteStatus, RouteLeg } from '../src/types/MultiRouterTypes'
 import { getBigNumber } from '../src/utils/MultiRouterMath'
 
-const testSeed = '1' // Change it to change random generator values
+const testSeed = '2' // Change it to change random generator values
 const rnd: () => number = seedrandom(testSeed) // random [0, 1)
 
 const GAS_PRICE = 1 * 200 * 1e-9
@@ -107,18 +107,18 @@ function getCPPool(rnd: () => number, t0: RToken, t1: RToken, price: number) {
   let reserve1 = reserve0 * price * imbalance
   const maxReserve = Math.max(reserve0, reserve1)
   if (maxReserve > MAX_LIQUIDITY) {
-    const reduceRate = maxReserve / MAX_LIQUIDITY
+    const reduceRate = (maxReserve / MAX_LIQUIDITY) * 1.00000001
     reserve0 /= reduceRate
     reserve1 /= reduceRate
   }
   const minReserve = Math.min(reserve0, reserve1)
   if (minReserve < MIN_LIQUIDITY) {
-    const raseRate = MIN_LIQUIDITY / minReserve
+    const raseRate = (MIN_LIQUIDITY / minReserve) * 1.00000001
     reserve0 *= raseRate
     reserve1 *= raseRate
   }
   console.assert(reserve0 >= MIN_LIQUIDITY && reserve0 <= MAX_LIQUIDITY, 'Error reserve0 clculation')
-  console.assert(reserve1 >= MIN_LIQUIDITY && reserve1 <= MAX_LIQUIDITY, 'Error reserve1 clculation')
+  console.assert(reserve1 >= MIN_LIQUIDITY && reserve1 <= MAX_LIQUIDITY, 'Error reserve1 clculation ' + reserve1)
 
   return new RConstantProductPool({
     token0: t0,
@@ -244,7 +244,7 @@ function checkRoute(
   } else if (basePricesAreSet) {
     const outPriceToBase = network.prices[parseInt(baseToken.name)] / network.prices[parseInt(to.name)]
     const expectedTotalAmountOut = route.amountOut - route.gasSpent * gasPrice * outPriceToBase
-    expectToBeClose(route.totalAmountOut, expectedTotalAmountOut, 1e-2) // TODO: reduce to 1e-10 !!!
+    expectToBeClose(route.totalAmountOut, expectedTotalAmountOut, MAX_POOL_IMBALANCE + 1e-7)
   } else {
     expect(route.totalAmountOut).toEqual(route.amountOut)
   }
@@ -292,6 +292,42 @@ function checkRoute(
   })
 }
 
+// Just for testing
+// @ts-ignore
+function exportNetwork(network: Network, from: RToken, to: RToken, route: MultiRoute) {
+  const allPools = new Map<string, Pool>()
+  network.pools.forEach(p => allPools.set(p.address, p))
+  const usedPools = new Map<string, boolean>()
+  route.legs.forEach(l => usedPools.set(l.address, l.token === allPools.get(l.address)?.token0))
+
+  function edgeStyle(p: Pool) {
+    const u = usedPools.get(p.address)
+    if (u === undefined) return ''
+    if (u) return ', value: 2, arrows: "to"'
+    else return ', value: 2, arrows: "from"'
+  }
+
+  function nodeLabel(t: RToken) {
+    if (t === from) return `${t.name}: ${route.amountIn}`
+    if (t === to) return `${t.name}: ${route.amountOut}`
+    return t.name
+  }
+
+  const nodes = `var nodes = new vis.DataSet([
+    ${network.tokens.map(t => `{ id: ${t.name}, label: "${nodeLabel(t)}"}`).join(',\n\t\t')}
+  ]);\n`
+  const edges = `var edges = new vis.DataSet([
+    ${network.pools.map(p => `{ from: ${p.token0.name}, to: ${p.token1.name}${edgeStyle(p)}}`).join(',\n\t\t')}
+  ]);\n`
+  const data = `var data = {
+      nodes: nodes,
+      edges: edges,
+  };\n`
+
+  const fs = require('fs')
+  fs.writeFileSync('D:/Info/Notes/GraphVisualization/data.js', nodes + edges + data)
+}
+
 const network = createNetwork(rnd, 20)
 it('Token price calculation is correct', () => {
   const baseTokenIndex = 0
@@ -302,7 +338,11 @@ it('Token price calculation is correct', () => {
       expectToBeClose(v.price, 1, 1e-10)
     }
     if (v.price !== 0) {
-      expectToBeClose(v.price, network.prices[tokenIndex] / network.prices[baseTokenIndex], 0.05)
+      expectToBeClose(
+        v.price,
+        network.prices[tokenIndex] / network.prices[baseTokenIndex],
+        2 * (MAX_POOL_IMBALANCE - 1)
+      )
     }
   })
 })
@@ -314,7 +354,6 @@ it(`Multirouter output is correct for 20 tokens and ${network.pools.length} pool
     expect(token0).not.toEqual(token1)
     const tokenBase = Math.floor(rnd() * 20)
     const amountIn = getRandom(rnd, 1e6, 1e24)
-    //console.log(i, token0, token1, tokenBase, amountIn);
 
     const route = findMultiRouting(
       network.tokens[token0],
