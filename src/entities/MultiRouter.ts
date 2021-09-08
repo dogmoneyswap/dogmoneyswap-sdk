@@ -1,3 +1,4 @@
+import { BigNumber } from '@ethersproject/bignumber'
 import { Pool, RToken, RouteLeg, MultiRoute, RouteStatus } from '../types/MultiRouterTypes'
 import { ASSERT, calcInByOut, calcOutByIn, closeValues, calcPrice } from '../utils/MultiRouterMath'
 import TopologicalSort from '../utils/TopologicalSort'
@@ -20,6 +21,10 @@ class Edge {
     this.amountInPrevious = 0
     this.amountOutPrevious = 0
     this.direction = true
+  }
+
+  reserve(v: Vertice): BigNumber {
+    return v === this.vert0 ? this.pool.reserve0 : this.pool.reserve1
   }
 
   calcOutput(v: Vertice, amountIn: number) {
@@ -179,7 +184,7 @@ class Vertice {
   }
 }
 
-class Graph {
+export class Graph {
   vertices: Vertice[]
   edges: Edge[]
   tokens: Map<RToken, Vertice>
@@ -206,12 +211,15 @@ class Graph {
     if (from.price !== 0) return
     from.price = price
     from.gasPrice = gasPrice
-    from.edges.forEach(e => {
+    const edges = from.edges
+      .map((e): [Edge, number] => [e, parseInt(e.reserve(from).toString())])
+      .sort(([_1, r1], [_2, r2]) => r2 - r1)
+    edges.forEach(([e, _]) => {
       const v = e.vert0 === from ? e.vert1 : e.vert0
       if (v.price !== 0) return
       let p = calcPrice(e.pool, 0)
-      if (from === e.vert1) p = 1 / p
-      this.setPrices(v, price * p, gasPrice * p)
+      if (from === e.vert0) p = 1 / p
+      this.setPrices(v, price * p, gasPrice / p)
     })
   }
 
@@ -288,10 +296,9 @@ class Graph {
           // Any arithmetic error or out-of-liquidity
           return
         }
-        // TODO: to test !!!!!!!!!!!!!!!!!!!!!!!!!!!!
         if (e.checkMinimalLiquidityExceededAfterSwap(closestVert as Vertice, newIncome)) return
         const newGasSpent = (closestVert as Vertice).gasSpent + gas
-        const price = finish.price / v2.price
+        const price = v2.price / finish.price
         const newTotal = newIncome * price - newGasSpent * finish.gasPrice
 
         if (!v2.bestSource) nextVertList.push(v2)
@@ -320,6 +327,7 @@ class Graph {
     ASSERT(() => {
       const res = this.vertices.every(v => {
         let total = 0
+        let totalModule = 0
         v.edges.forEach(e => {
           if (e.vert0 === v) {
             if (e.direction) {
@@ -327,17 +335,20 @@ class Graph {
             } else {
               total += e.amountInPrevious
             }
+            totalModule += e.amountInPrevious
           } else {
             if (e.direction) {
               total += e.amountOutPrevious
             } else {
               total -= e.amountOutPrevious
             }
+            totalModule += e.amountOutPrevious
           }
         })
         if (v === from) return total <= 0
         if (v === to) return total >= 0
-        return Math.abs(total) < 1e10
+        if (totalModule === 0) return total === 0
+        return Math.abs(total / totalModule) < 1e10
       })
       return res
     }, 'Error 290')
@@ -415,7 +426,7 @@ class Graph {
         })
         outAmount -= p
       })
-      console.assert(Math.abs(outAmount) < 1e-6, 'Error 281')
+      console.assert(outAmount / total < 1e-12, 'Error 281')
     })
     return legs
   }
@@ -456,7 +467,7 @@ export function findMultiRouting(
   baseToken: RToken,
   gasPrice: number,
   steps: number | number[] = 12
-): MultiRoute | undefined {
+): MultiRoute {
   const g = new Graph(pools, baseToken, gasPrice)
   const fromV = g.tokens.get(from)
   if (fromV?.price === 0) {
