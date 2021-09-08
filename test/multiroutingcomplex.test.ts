@@ -11,7 +11,7 @@ const GAS_PRICE = 1 * 200 * 1e-9
 //const TOKEN_NUMBER = 20
 const MIN_TOKEN_PRICE = 1e-6
 const MAX_TOKEN_PRICE = 1e6
-const POOL_CP_DENSITY = 0.2
+const POOL_CP_DENSITY = 0.3
 const MIN_POOL_RESERVE = 1e9
 const MAX_POOL_RESERVE = 1e31
 const MIN_POOL_IMBALANCE = 1 / (1 + 1e-3)
@@ -148,7 +148,16 @@ function createNetwork(rnd: () => number, tokenNumber: number): Network {
   const pools = []
   for (i = 0; i < tokenNumber; ++i) {
     for (var j = i + 1; j < tokenNumber; ++j) {
-      if (rnd() < POOL_CP_DENSITY) {
+      const r = rnd()
+      if (r < POOL_CP_DENSITY) {
+        pools.push(getCPPool(rnd, tokens[i], tokens[j], prices[i] / prices[j]))
+      }
+      if (r < POOL_CP_DENSITY * POOL_CP_DENSITY) {
+        // second pool
+        pools.push(getCPPool(rnd, tokens[i], tokens[j], prices[i] / prices[j]))
+      }
+      if (r < POOL_CP_DENSITY * POOL_CP_DENSITY * POOL_CP_DENSITY) {
+        // third pool
         pools.push(getCPPool(rnd, tokens[i], tokens[j], prices[i] / prices[j]))
       }
     }
@@ -341,7 +350,7 @@ it('Token price calculation is correct', () => {
       expectToBeClose(
         v.price,
         network.prices[tokenIndex] / network.prices[baseTokenIndex],
-        2 * (MAX_POOL_IMBALANCE - 1)
+        5 * (MAX_POOL_IMBALANCE - 1)
       )
     }
   })
@@ -354,7 +363,7 @@ it(`Multirouter output is correct for 20 tokens and ${network.pools.length} pool
     expect(token0).not.toEqual(token1)
     const tokenBase = Math.floor(rnd() * 20)
     const amountIn = getRandom(rnd, 1e6, 1e24)
-
+    if (i !== 161) continue
     const route = findMultiRouting(
       network.tokens[token0],
       network.tokens[token1],
@@ -363,6 +372,7 @@ it(`Multirouter output is correct for 20 tokens and ${network.pools.length} pool
       network.tokens[tokenBase],
       network.gasPrice
     )
+    exportNetwork(network, network.tokens[token0], network.tokens[token1], route)
     checkRoute(
       network,
       network.tokens[token0],
