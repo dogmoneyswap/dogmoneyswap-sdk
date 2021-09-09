@@ -41,12 +41,15 @@ describe('computePoolAddress', () => {
     const tokenA = new Token(ChainId.KOVAN, USDC_ADDRESS[ChainId.KOVAN], 6, 'USDC', 'USD Coin')
     const tokenB = new Token(ChainId.KOVAN, WETH9_ADDRESS[ChainId.KOVAN], 18, 'WETH', 'Wrapped Ether')
 
+    expect(tokenA.address).toEqual("0xb7a4F3E9097C08dA09517b5aB877F7a917224ede");
+    expect(tokenB.address).toEqual("0xd0A1E359811322d97991E03f863a0C30C2cF029C");
+
     const fee = 30
 
     const twap = true
 
     const address = computeConstantProductPoolAddress({
-      factoryAddress: '0x2d7933851D0b372ffB810793Cf86D33177F6812f',
+      factoryAddress: '0x5e343eD1586e13d5e34A204667FAb0D81F85a2c2',
       tokenA,
       tokenB,
       fee,
@@ -59,7 +62,7 @@ describe('computePoolAddress', () => {
     //   INIT_CODE_HASH
     // )
 
-    expect(address).toEqual('0x0d4EC1428C59EBDEE041a7Caa2c84567218063f9')
+    expect(address).toEqual('0x0fAEf585696341BD02F607a1C617dbAa2bb6381a')
   })
 })
 

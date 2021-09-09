@@ -103,7 +103,7 @@ class TopologicalSort<KeyType, ValueType> {
   }
 
   private addMultipleInternalNodes(nodes: Map<KeyType, ValueType>) {
-    const nodesFlat = [...nodes]
+    const nodesFlat = Array.from(nodes)
 
     for (let i = nodes.size - 1; i >= 0; i--) {
       const [key, node] = nodesFlat[i]
