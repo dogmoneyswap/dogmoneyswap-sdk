@@ -1,4 +1,4 @@
-import { CurrencyAmount, Ether, Percent, Token } from './entities'
+import { CurrencyAmount, SmartBCH, Percent, Token } from './entities'
 import { Pair, Route, Trade } from './entities'
 
 import JSBI from 'jsbi'
@@ -14,7 +14,7 @@ function checkDeadline(deadline: string[] | string): void {
 }
 
 describe('Router', () => {
-  const ETHER = Ether.onChain(1)
+  const ETHER = SmartBCH.onChain(1)
   const token0 = new Token(1, '0x0000000000000000000000000000000000000001', 18, 't0')
   const token1 = new Token(1, '0x0000000000000000000000000000000000000002', 18, 't1')
 
@@ -34,7 +34,7 @@ describe('Router', () => {
         const result = Router.swapCallParameters(
           Trade.exactIn(
             new Route([pair_weth_0, pair_0_1], ETHER, token1),
-            CurrencyAmount.fromRawAmount(Ether.onChain(1), JSBI.BigInt(100))
+            CurrencyAmount.fromRawAmount(SmartBCH.onChain(1), JSBI.BigInt(100))
           ),
           {
             ttl: 50,
@@ -56,7 +56,7 @@ describe('Router', () => {
         const result = Router.swapCallParameters(
           Trade.exactIn(
             new Route([pair_weth_0, pair_0_1], ETHER, token1),
-            CurrencyAmount.fromRawAmount(Ether.onChain(1), JSBI.BigInt(100))
+            CurrencyAmount.fromRawAmount(SmartBCH.onChain(1), JSBI.BigInt(100))
           ),
           {
             deadline: 50,
@@ -142,7 +142,7 @@ describe('Router', () => {
         const result = Router.swapCallParameters(
           Trade.exactOut(
             new Route([pair_0_1, pair_weth_0], token1, ETHER),
-            CurrencyAmount.fromRawAmount(Ether.onChain(1), JSBI.BigInt(100))
+            CurrencyAmount.fromRawAmount(SmartBCH.onChain(1), JSBI.BigInt(100))
           ),
           {
             ttl: 50,
@@ -186,7 +186,7 @@ describe('Router', () => {
           const result = Router.swapCallParameters(
             Trade.exactIn(
               new Route([pair_weth_0, pair_0_1], ETHER, token1),
-              CurrencyAmount.fromRawAmount(Ether.onChain(1), JSBI.BigInt(100))
+              CurrencyAmount.fromRawAmount(SmartBCH.onChain(1), JSBI.BigInt(100))
             ),
             {
               ttl: 50,
@@ -273,7 +273,7 @@ describe('Router', () => {
             Router.swapCallParameters(
               Trade.exactOut(
                 new Route([pair_0_1, pair_weth_0], token1, ETHER),
-                CurrencyAmount.fromRawAmount(Ether.onChain(1), JSBI.BigInt(100))
+                CurrencyAmount.fromRawAmount(SmartBCH.onChain(1), JSBI.BigInt(100))
               ),
               {
                 ttl: 50,

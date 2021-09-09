@@ -1,4 +1,4 @@
-import { Ether } from './Native'
+import { SmartBCH } from './Native'
 import { Token } from './Token'
 
 describe('Currency', () => {
@@ -9,11 +9,11 @@ describe('Currency', () => {
   const t1 = new Token(1, ADDRESS_ONE, 18)
 
   describe('#equals', () => {
-    it('ether on same chains is ether', () => {
-      expect(Ether.onChain(1).equals(Ether.onChain(1)))
+    it('bch on same chains is bch', () => {
+      expect(SmartBCH.onChain(1).equals(SmartBCH.onChain(1)))
     })
-    it('ether is not token0', () => {
-      expect(Ether.onChain(1).equals(t0)).toStrictEqual(false)
+    it('bch is not token0', () => {
+      expect(SmartBCH.onChain(1).equals(t0)).toStrictEqual(false)
     })
     it('token1 is not token0', () => {
       expect(t1.equals(t0)).toStrictEqual(false)

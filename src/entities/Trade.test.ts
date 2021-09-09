@@ -1,11 +1,11 @@
-import { CurrencyAmount, Ether, Pair, Percent, Price, Route, Token, Trade } from '.'
+import { CurrencyAmount, SmartBCH, Pair, Percent, Price, Route, Token, Trade } from '.'
 
 import JSBI from 'jsbi'
 import { TradeType } from '../enums'
 import { WETH9 } from '../constants'
 
 describe('Trade', () => {
-  const ETHER = Ether.onChain(1)
+  const ETHER = SmartBCH.onChain(1)
   const token0 = new Token(1, '0x0000000000000000000000000000000000000001', 18, 't0')
   const token1 = new Token(1, '0x0000000000000000000000000000000000000002', 18, 't1')
   const token2 = new Token(1, '0x0000000000000000000000000000000000000003', 18, 't2')
@@ -45,7 +45,7 @@ describe('Trade', () => {
   it('can be constructed with ETHER as input', () => {
     const trade = new Trade(
       new Route([pair_weth_0], ETHER, token0),
-      CurrencyAmount.fromRawAmount(Ether.onChain(1), JSBI.BigInt(100)),
+      CurrencyAmount.fromRawAmount(SmartBCH.onChain(1), JSBI.BigInt(100)),
       TradeType.EXACT_INPUT
     )
     expect(trade.inputAmount.currency).toEqual(ETHER)
@@ -64,7 +64,7 @@ describe('Trade', () => {
   it('can be constructed with ETHER as output', () => {
     const trade = new Trade(
       new Route([pair_weth_0], token0, ETHER),
-      CurrencyAmount.fromRawAmount(Ether.onChain(1), JSBI.BigInt(100)),
+      CurrencyAmount.fromRawAmount(SmartBCH.onChain(1), JSBI.BigInt(100)),
       TradeType.EXACT_OUTPUT
     )
     expect(trade.inputAmount.currency).toEqual(token0)
@@ -164,7 +164,7 @@ describe('Trade', () => {
     it('works for ETHER currency input', () => {
       const result = Trade.bestTradeExactIn(
         [pair_weth_0, pair_0_1, pair_0_3, pair_1_3],
-        CurrencyAmount.fromRawAmount(Ether.onChain(1), JSBI.BigInt(100)),
+        CurrencyAmount.fromRawAmount(SmartBCH.onChain(1), JSBI.BigInt(100)),
         token3
       )
       expect(result).toHaveLength(2)
@@ -448,7 +448,7 @@ describe('Trade', () => {
       const result = Trade.bestTradeExactOut(
         [pair_weth_0, pair_0_1, pair_0_3, pair_1_3],
         token3,
-        CurrencyAmount.fromRawAmount(Ether.onChain(1), JSBI.BigInt(100))
+        CurrencyAmount.fromRawAmount(SmartBCH.onChain(1), JSBI.BigInt(100))
       )
       expect(result).toHaveLength(2)
       expect(result[0].inputAmount.currency).toEqual(token3)

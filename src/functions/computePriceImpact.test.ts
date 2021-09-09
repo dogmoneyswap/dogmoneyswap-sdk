@@ -1,4 +1,4 @@
-import { CurrencyAmount, Ether, Percent, Price, Token } from '../entities'
+import { CurrencyAmount, SmartBCH, Percent, Price, Token } from '../entities'
 import { computePriceImpact } from './computePriceImpact'
 
 describe('#computePriceImpact', () => {
@@ -11,8 +11,8 @@ describe('#computePriceImpact', () => {
   it('is correct for zero', () => {
     expect(
       computePriceImpact(
-        new Price(Ether.onChain(1), t0, 10, 100),
-        CurrencyAmount.fromRawAmount(Ether.onChain(1), 10),
+        new Price(SmartBCH.onChain(1), t0, 10, 100),
+        CurrencyAmount.fromRawAmount(SmartBCH.onChain(1), 10),
         CurrencyAmount.fromRawAmount(t0, 100)
       )
     ).toEqual(new Percent(0, 10000))

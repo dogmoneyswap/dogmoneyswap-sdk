@@ -1,4 +1,4 @@
-import { USDC_ADDRESS, WETH9_ADDRESS } from '../constants'
+import { FLEXUSD_ADDRESS, WETH9_ADDRESS } from '../constants'
 
 import { ChainId } from '../enums'
 import { Token } from '.'
@@ -38,11 +38,11 @@ import { computeConstantProductPoolAddress } from '../functions/computeConstantP
 
 describe('computePoolAddress', () => {
   it('should correctly compute the pool address 2', () => {
-    const tokenA = new Token(ChainId.KOVAN, USDC_ADDRESS[ChainId.KOVAN], 6, 'USDC', 'USD Coin')
-    const tokenB = new Token(ChainId.KOVAN, WETH9_ADDRESS[ChainId.KOVAN], 18, 'WETH', 'Wrapped Ether')
+    const tokenA = new Token(ChainId.SMARTBCH, FLEXUSD_ADDRESS[ChainId.SMARTBCH], 6, 'flexUSD', 'FlexUSD')
+    const tokenB = new Token(ChainId.SMARTBCH, WETH9_ADDRESS[ChainId.SMARTBCH], 18, 'BCH', 'Bitcoin Cash')
 
-    expect(tokenA.address).toEqual("0xb7a4F3E9097C08dA09517b5aB877F7a917224ede");
-    expect(tokenB.address).toEqual("0xd0A1E359811322d97991E03f863a0C30C2cF029C");
+    expect(tokenA.address).toEqual('0xb7a4F3E9097C08dA09517b5aB877F7a917224ede')
+    expect(tokenB.address).toEqual('0xd0A1E359811322d97991E03f863a0C30C2cF029C')
 
     const fee = 30
 

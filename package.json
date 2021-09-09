@@ -1,7 +1,7 @@
 {
   "name": "@mistswapdex/sdk",
   "license": "MIT",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "🛠 An SDK for building applications on top of MISTswap.",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -23,14 +23,6 @@
     "prepublishOnly": "tsdx build",
     "prepare": "husky install",
     "prettier": "prettier --write 'src/**/*.ts' 'test/**/*.ts'"
-  },
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "yarn lint",
-      "yarn test --bail --passWithNoTests --findRelatedTests",
-      "prettier --write"
-    ],
-    "*.md": "prettier --write"
   },
   "dependencies": {
     "big.js": "^6.1.0",
@@ -75,7 +67,6 @@
     "babel-plugin-transform-jsbi-to-bigint": "^1.4.0",
     "eip-712": "^0.4.3",
     "husky": "^7.0.0",
-    "lint-staged": "^11.1.2",
     "seedrandom": "^3.0.5",
     "tsdx": "^0.14.1"
   },
