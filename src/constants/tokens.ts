@@ -10,7 +10,7 @@ export const FLEXUSD: TokenMap = {
 
 export const WETH9: TokenMap = {
   [ChainId.SMARTBCH]: new Token(ChainId.SMARTBCH, WETH9_ADDRESS[ChainId.SMARTBCH], 18, 'BCH', 'Bitcoin Cash'),
-  [ChainId.SMARTBCH_AMBER]: new Token(ChainId.SMARTBCH, WETH9_ADDRESS[ChainId.SMARTBCH_AMBER], 18, 'TBCH', 'Bitcoin Cash')
+  [ChainId.SMARTBCH_AMBER]: new Token(ChainId.SMARTBCH_AMBER, WETH9_ADDRESS[ChainId.SMARTBCH_AMBER], 18, 'TBCH', 'Bitcoin Cash')
 }
 
 export const WNATIVE: TokenMap = {
