@@ -5,13 +5,13 @@ describe('#computePriceImpact', () => {
   const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
   const ADDRESS_ONE = '0x0000000000000000000000000000000000000001'
 
-  const t0 = new Token(1, ADDRESS_ZERO, 18)
-  const t1 = new Token(1, ADDRESS_ONE, 18)
+  const t0 = new Token(10000, ADDRESS_ZERO, 18)
+  const t1 = new Token(10000, ADDRESS_ONE, 18)
 
   it('is correct for zero', () => {
     expect(
       computePriceImpact(
-        new Price(SmartBCH.onChain(1), t0, 10, 100),
+        new Price(SmartBCH.onChain(10000), t0, 10, 100),
         CurrencyAmount.fromRawAmount(SmartBCH.onChain(1), 10),
         CurrencyAmount.fromRawAmount(t0, 100)
       )

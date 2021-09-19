@@ -16,9 +16,9 @@ import { computeConstantProductPoolAddress } from '../functions/computeConstantP
 
 // describe('computePoolAddress', () => {
 //   it('should correctly compute the pool address', () => {
-//     const tokenA = new Token(1, '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', 18, 'USDC', 'USD Coin')
+//     const tokenA = new Token(10000, '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', 18, 'USDC', 'USD Coin')
 
-//     const tokenB = new Token(1, '0x6B175474E89094C44Da98b954EedeAC495271d0F', 18, 'DAI', 'DAI Stablecoin')
+//     const tokenB = new Token(10000, '0x6B175474E89094C44Da98b954EedeAC495271d0F', 18, 'DAI', 'DAI Stablecoin')
 
 //     const fee = 25
 
@@ -38,11 +38,11 @@ import { computeConstantProductPoolAddress } from '../functions/computeConstantP
 
 describe('computePoolAddress', () => {
   it('should correctly compute the pool address 2', () => {
-    const tokenA = new Token(ChainId.SMARTBCH, FLEXUSD_ADDRESS[ChainId.SMARTBCH], 6, 'flexUSD', 'FlexUSD')
+    const tokenA = new Token(ChainId.SMARTBCH, FLEXUSD_ADDRESS[ChainId.SMARTBCH], 18, 'flexUSD', 'FlexUSD')
     const tokenB = new Token(ChainId.SMARTBCH, WETH9_ADDRESS[ChainId.SMARTBCH], 18, 'BCH', 'Bitcoin Cash')
 
-    expect(tokenA.address).toEqual('0xb7a4F3E9097C08dA09517b5aB877F7a917224ede')
-    expect(tokenB.address).toEqual('0xd0A1E359811322d97991E03f863a0C30C2cF029C')
+    expect(tokenA.address).toEqual('0x7b2B3C5308ab5b2a1d9a94d20D35CCDf61e05b72')
+    expect(tokenB.address).toEqual('0x0000000000000000000000000000000000002711')
 
     const fee = 30
 
@@ -67,8 +67,8 @@ describe('computePoolAddress', () => {
 })
 
 // describe('ConstantProductPool', () => {
-//   const USDC = new Token(1, '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', 18, 'USDC', 'USD Coin')
-//   const DAI = new Token(1, '0x6B175474E89094C44Da98b954EedeAC495271d0F', 18, 'DAI', 'DAI Stablecoin')
+//   const USDC = new Token(10000, '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', 18, 'USDC', 'USD Coin')
+//   const DAI = new Token(10000, '0x6B175474E89094C44Da98b954EedeAC495271d0F', 18, 'DAI', 'DAI Stablecoin')
 
 //   describe('constructor', () => {
 //     it('cannot be used for tokens on different chains', () => {
@@ -174,7 +174,7 @@ describe('computePoolAddress', () => {
 //     })
 
 //     it('throws if invalid token', () => {
-//       expect(() => pair.priceOf(WETH9[1])).toThrow('TOKEN')
+//       expect(() => pair.priceOf(WETH9[10000])).toThrow('TOKEN')
 //     })
 //   })
 
@@ -199,7 +199,7 @@ describe('computePoolAddress', () => {
 //         new ConstantProductPool(
 //           CurrencyAmount.fromRawAmount(DAI, '101'),
 //           CurrencyAmount.fromRawAmount(USDC, '100')
-//         ).reserveOf(WETH9[1])
+//         ).reserveOf(WETH9[10000])
 //       ).toThrow('TOKEN')
 //     })
 //   })
@@ -233,13 +233,13 @@ describe('computePoolAddress', () => {
 //       new ConstantProductPool(
 //         CurrencyAmount.fromRawAmount(USDC, '100'),
 //         CurrencyAmount.fromRawAmount(DAI, '100')
-//       ).involvesToken(WETH9[1])
+//       ).involvesToken(WETH9[10000])
 //     ).toEqual(false)
 //   })
 //   describe('miscellaneous', () => {
 //     it('getLiquidityMinted:0', async () => {
-//       const tokenA = new Token(3, '0x0000000000000000000000000000000000000001', 18)
-//       const tokenB = new Token(3, '0x0000000000000000000000000000000000000002', 18)
+//       const tokenA = new Token(10001, '0x0000000000000000000000000000000000000001', 18)
+//       const tokenB = new Token(10001, '0x0000000000000000000000000000000000000002', 18)
 //       const pair = new ConstantProductPool(
 //         CurrencyAmount.fromRawAmount(tokenA, '0'),
 //         CurrencyAmount.fromRawAmount(tokenB, '0')
@@ -271,8 +271,8 @@ describe('computePoolAddress', () => {
 //     })
 
 //     it('getLiquidityMinted:!0', async () => {
-//       const tokenA = new Token(3, '0x0000000000000000000000000000000000000001', 18)
-//       const tokenB = new Token(3, '0x0000000000000000000000000000000000000002', 18)
+//       const tokenA = new Token(10001, '0x0000000000000000000000000000000000000001', 18)
+//       const tokenB = new Token(10001, '0x0000000000000000000000000000000000000002', 18)
 //       const pair = new ConstantProductPool(
 //         CurrencyAmount.fromRawAmount(tokenA, '10000'),
 //         CurrencyAmount.fromRawAmount(tokenB, '10000')
@@ -290,8 +290,8 @@ describe('computePoolAddress', () => {
 //     })
 
 //     it('getLiquidityValue:!feeOn', async () => {
-//       const tokenA = new Token(3, '0x0000000000000000000000000000000000000001', 18)
-//       const tokenB = new Token(3, '0x0000000000000000000000000000000000000002', 18)
+//       const tokenA = new Token(10001, '0x0000000000000000000000000000000000000001', 18)
+//       const tokenB = new Token(10001, '0x0000000000000000000000000000000000000002', 18)
 //       const pair = new ConstantProductPool(
 //         CurrencyAmount.fromRawAmount(tokenA, '1000'),
 //         CurrencyAmount.fromRawAmount(tokenB, '1000')
@@ -334,8 +334,8 @@ describe('computePoolAddress', () => {
 //     })
 
 //     it('getLiquidityValue:feeOn', async () => {
-//       const tokenA = new Token(3, '0x0000000000000000000000000000000000000001', 18)
-//       const tokenB = new Token(3, '0x0000000000000000000000000000000000000002', 18)
+//       const tokenA = new Token(10001, '0x0000000000000000000000000000000000000001', 18)
+//       const tokenB = new Token(10001, '0x0000000000000000000000000000000000000002', 18)
 
 //       const pair = new ConstantProductPool(
 //         CurrencyAmount.fromRawAmount(tokenA, '1000'),

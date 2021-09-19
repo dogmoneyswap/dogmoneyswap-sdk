@@ -83,7 +83,7 @@ describe('Limit Order', () => {
       v: 27,
       r: '0xb329d28a2d8789b7381cbe307dc687ea46f3dad763bde94b6814820617fbbb49',
       s: '0x74f47425d7dc35021016089c723e6cb09e874a45cc6d74f23dd4d15cc20b705c',
-      chainId: 42
+      chainId: 10001
     }
     const lOrder = LimitOrder.getLimitOrder(data)
     expect(lOrder.amountInRaw).toEqual('13122000000000000')
