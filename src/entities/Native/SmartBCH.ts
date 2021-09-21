@@ -1,18 +1,18 @@
 import { Currency } from '../Currency'
 import { NativeCurrency } from '../NativeCurrency'
 import { Token } from '../Token'
-import { WNATIVE } from '../../constants/tokens'
+import { WETH9 } from '../../constants/tokens'
 import invariant from 'tiny-invariant'
 
 export class SmartBCH extends NativeCurrency {
   protected constructor(chainId: number) {
-    super(chainId, 18, 'BCH', 'Bitcoin Cash')
+    super(chainId, 18, 'BCH', 'BCH')
   }
 
   public get wrapped(): Token {
-    const wnative = WNATIVE[this.chainId]
-    invariant(!!wnative, 'WRAPPED')
-    return wnative
+    const weth9 = WETH9[this.chainId]
+    invariant(!!weth9, 'WRAPPED')
+    return weth9
   }
 
   private static _cache: { [chainId: number]: SmartBCH } = {}
