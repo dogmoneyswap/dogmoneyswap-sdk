@@ -2,7 +2,7 @@ import { CurrencyAmount, Price, Token } from '.'
 
 import { InsufficientInputAmountError } from '../errors'
 import { Pair } from './Pair'
-import { WETH9 } from '../constants'
+import { WBCH } from '../constants'
 import { computePairAddress } from '../functions'
 
 describe('computePairAddress', () => {
@@ -47,7 +47,7 @@ describe('Pair', () => {
   describe('constructor', () => {
     it('cannot be used for tokens on different chains', () => {
       expect(
-        () => new Pair(CurrencyAmount.fromRawAmount(USDC, '100'), CurrencyAmount.fromRawAmount(WETH9[3], '100'))
+        () => new Pair(CurrencyAmount.fromRawAmount(USDC, '100'), CurrencyAmount.fromRawAmount(WBCH[3], '100'))
       ).toThrow('CHAIN_IDS')
     })
   })
@@ -129,7 +129,7 @@ describe('Pair', () => {
     })
 
     it('throws if invalid token', () => {
-      expect(() => pair.priceOf(WETH9[10000])).toThrow('TOKEN')
+      expect(() => pair.priceOf(WBCH[10000])).toThrow('TOKEN')
     })
   })
 
@@ -146,7 +146,7 @@ describe('Pair', () => {
     it('throws if not in the pair', () => {
       expect(() =>
         new Pair(CurrencyAmount.fromRawAmount(DAI, '101'), CurrencyAmount.fromRawAmount(USDC, '100')).reserveOf(
-          WETH9[10000]
+          WBCH[10000]
         )
       ).toThrow('TOKEN')
     })
@@ -171,7 +171,7 @@ describe('Pair', () => {
     ).toEqual(true)
     expect(
       new Pair(CurrencyAmount.fromRawAmount(USDC, '100'), CurrencyAmount.fromRawAmount(DAI, '100')).involvesToken(
-        WETH9[10000]
+        WBCH[10000]
       )
     ).toEqual(false)
   })

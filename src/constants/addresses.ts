@@ -44,14 +44,14 @@ export const BENTOBOX_ADDRESS: AddressMap = {}
 export const KASHI_ADDRESS: AddressMap = {}
 export const STOP_LIMIT_ORDER_ADDRESS: AddressMap = {}
 
-export const WETH9_ADDRESS: AddressMap = {
+export const WBCH_ADDRESS: AddressMap = {
   [ChainId.SMARTBCH]: '0x3743eC0673453E5009310C727Ba4eaF7b3a1cc04',
   [ChainId.SMARTBCH_AMBER]: '0x17F4FCF5b6E0A95D4eE331c8529041896A073F9b'
 }
 
 export const WNATIVE_ADDRESS: AddressMap = {
-  [ChainId.SMARTBCH]: WETH9_ADDRESS[ChainId.SMARTBCH],
-  [ChainId.SMARTBCH_AMBER]: WETH9_ADDRESS[ChainId.SMARTBCH_AMBER],
+  [ChainId.SMARTBCH]: WBCH_ADDRESS[ChainId.SMARTBCH],
+  [ChainId.SMARTBCH_AMBER]: WBCH_ADDRESS[ChainId.SMARTBCH_AMBER],
 }
 
 export const MASTERCHEF_V2_ADDRESS: AddressMap = {

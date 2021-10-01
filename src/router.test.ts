@@ -3,7 +3,7 @@ import { Pair, Route, Trade } from './entities'
 
 import JSBI from 'jsbi'
 import { Router } from './router'
-import { WETH9 } from './constants'
+import { WBCH } from './constants'
 import invariant from 'tiny-invariant'
 
 function checkDeadline(deadline: string[] | string): void {
@@ -24,7 +24,7 @@ describe('Router', () => {
   )
 
   const pair_weth_0 = new Pair(
-    CurrencyAmount.fromRawAmount(WETH9[10000], '1000'),
+    CurrencyAmount.fromRawAmount(WBCH[10000], '1000'),
     CurrencyAmount.fromRawAmount(token0, '1000')
   )
 
@@ -45,7 +45,7 @@ describe('Router', () => {
         expect(result.methodName).toEqual('swapExactETHForTokens')
         expect(result.args.slice(0, -1)).toEqual([
           '0x51',
-          [WETH9[10000].address, token0.address, token1.address],
+          [WBCH[10000].address, token0.address, token1.address],
           '0x0000000000000000000000000000000000000004'
         ])
         expect(result.value).toEqual('0x64')
@@ -67,7 +67,7 @@ describe('Router', () => {
         expect(result.methodName).toEqual('swapExactETHForTokens')
         expect(result.args).toEqual([
           '0x51',
-          [WETH9[10000].address, token0.address, token1.address],
+          [WBCH[10000].address, token0.address, token1.address],
           '0x0000000000000000000000000000000000000004',
           '0x32'
         ])
@@ -90,7 +90,7 @@ describe('Router', () => {
         expect(result.args.slice(0, -1)).toEqual([
           '0x64',
           '0x51',
-          [token1.address, token0.address, WETH9[10000].address],
+          [token1.address, token0.address, WBCH[10000].address],
           '0x0000000000000000000000000000000000000004'
         ])
         expect(result.value).toEqual('0x0')
@@ -132,7 +132,7 @@ describe('Router', () => {
         expect(result.methodName).toEqual('swapETHForExactTokens')
         expect(result.args.slice(0, -1)).toEqual([
           '0x64',
-          [WETH9[10000].address, token0.address, token1.address],
+          [WBCH[10000].address, token0.address, token1.address],
           '0x0000000000000000000000000000000000000004'
         ])
         expect(result.value).toEqual('0x80')
@@ -154,7 +154,7 @@ describe('Router', () => {
         expect(result.args.slice(0, -1)).toEqual([
           '0x64',
           '0x80',
-          [token1.address, token0.address, WETH9[10000].address],
+          [token1.address, token0.address, WBCH[10000].address],
           '0x0000000000000000000000000000000000000004'
         ])
         expect(result.value).toEqual('0x0')
@@ -198,7 +198,7 @@ describe('Router', () => {
           expect(result.methodName).toEqual('swapExactETHForTokensSupportingFeeOnTransferTokens')
           expect(result.args.slice(0, -1)).toEqual([
             '0x51',
-            [WETH9[10000].address, token0.address, token1.address],
+            [WBCH[10000].address, token0.address, token1.address],
             '0x0000000000000000000000000000000000000004'
           ])
           expect(result.value).toEqual('0x64')
@@ -221,7 +221,7 @@ describe('Router', () => {
           expect(result.args.slice(0, -1)).toEqual([
             '0x64',
             '0x51',
-            [token1.address, token0.address, WETH9[10000].address],
+            [token1.address, token0.address, WBCH[10000].address],
             '0x0000000000000000000000000000000000000004'
           ])
           expect(result.value).toEqual('0x0')

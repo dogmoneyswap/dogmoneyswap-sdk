@@ -2,7 +2,7 @@ import { CurrencyAmount, SmartBCH, Pair, Percent, Price, Route, Token, Trade } f
 
 import JSBI from 'jsbi'
 import { TradeType } from '../enums'
-import { WETH9 } from '../constants'
+import { WBCH } from '../constants'
 
 describe('Trade', () => {
   const ETHER = SmartBCH.onChain(10000)
@@ -33,7 +33,7 @@ describe('Trade', () => {
   )
 
   const pair_weth_0 = new Pair(
-    CurrencyAmount.fromRawAmount(WETH9[10000], JSBI.BigInt(1000)),
+    CurrencyAmount.fromRawAmount(WBCH[10000], JSBI.BigInt(1000)),
     CurrencyAmount.fromRawAmount(token0, JSBI.BigInt(1000))
   )
 
@@ -169,10 +169,10 @@ describe('Trade', () => {
       )
       expect(result).toHaveLength(2)
       expect(result[0].inputAmount.currency).toEqual(ETHER)
-      expect(result[0].route.path).toEqual([WETH9[10000], token0, token1, token3])
+      expect(result[0].route.path).toEqual([WBCH[10000], token0, token1, token3])
       expect(result[0].outputAmount.currency).toEqual(token3)
       expect(result[1].inputAmount.currency).toEqual(ETHER)
-      expect(result[1].route.path).toEqual([WETH9[10000], token0, token3])
+      expect(result[1].route.path).toEqual([WBCH[10000], token0, token3])
       expect(result[1].outputAmount.currency).toEqual(token3)
     })
     it('works for ETHER currency output', () => {
@@ -183,10 +183,10 @@ describe('Trade', () => {
       )
       expect(result).toHaveLength(2)
       expect(result[0].inputAmount.currency).toEqual(token3)
-      expect(result[0].route.path).toEqual([token3, token0, WETH9[10000]])
+      expect(result[0].route.path).toEqual([token3, token0, WBCH[10000]])
       expect(result[0].outputAmount.currency).toEqual(ETHER)
       expect(result[1].inputAmount.currency).toEqual(token3)
-      expect(result[1].route.path).toEqual([token3, token1, token0, WETH9[10000]])
+      expect(result[1].route.path).toEqual([token3, token1, token0, WBCH[10000]])
       expect(result[1].outputAmount.currency).toEqual(ETHER)
     })
   })
@@ -438,10 +438,10 @@ describe('Trade', () => {
       )
       expect(result).toHaveLength(2)
       expect(result[0].inputAmount.currency).toEqual(ETHER)
-      expect(result[0].route.path).toEqual([WETH9[10000], token0, token1, token3])
+      expect(result[0].route.path).toEqual([WBCH[10000], token0, token1, token3])
       expect(result[0].outputAmount.currency).toEqual(token3)
       expect(result[1].inputAmount.currency).toEqual(ETHER)
-      expect(result[1].route.path).toEqual([WETH9[10000], token0, token3])
+      expect(result[1].route.path).toEqual([WBCH[10000], token0, token3])
       expect(result[1].outputAmount.currency).toEqual(token3)
     })
     it('works for ETHER currency output', () => {
@@ -452,10 +452,10 @@ describe('Trade', () => {
       )
       expect(result).toHaveLength(2)
       expect(result[0].inputAmount.currency).toEqual(token3)
-      expect(result[0].route.path).toEqual([token3, token0, WETH9[10000]])
+      expect(result[0].route.path).toEqual([token3, token0, WBCH[10000]])
       expect(result[0].outputAmount.currency).toEqual(ETHER)
       expect(result[1].inputAmount.currency).toEqual(token3)
-      expect(result[1].route.path).toEqual([token3, token1, token0, WETH9[10000]])
+      expect(result[1].route.path).toEqual([token3, token1, token0, WBCH[10000]])
       expect(result[1].outputAmount.currency).toEqual(ETHER)
     })
   })

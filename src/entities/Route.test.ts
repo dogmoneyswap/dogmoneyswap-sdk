@@ -1,12 +1,12 @@
 import { CurrencyAmount, SmartBCH, Pair, Route, Token } from './index'
 
-import { WETH9 } from '../constants'
+import { WBCH } from '../constants'
 
 describe('Route', () => {
   const BCH = SmartBCH.onChain(10000)
   const token0 = new Token(10000, '0x0000000000000000000000000000000000000001', 18, 't0')
   const token1 = new Token(10000, '0x0000000000000000000000000000000000000002', 18, 't1')
-  const weth = WETH9[10000]
+  const weth = WBCH[10000]
   const pair_0_1 = new Pair(CurrencyAmount.fromRawAmount(token0, '100'), CurrencyAmount.fromRawAmount(token1, '200'))
   const pair_0_weth = new Pair(CurrencyAmount.fromRawAmount(token0, '100'), CurrencyAmount.fromRawAmount(weth, '100'))
   const pair_1_weth = new Pair(CurrencyAmount.fromRawAmount(token1, '175'), CurrencyAmount.fromRawAmount(weth, '100'))

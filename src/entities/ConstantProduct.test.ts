@@ -1,4 +1,4 @@
-import { FLEXUSD_ADDRESS, WETH9_ADDRESS } from '../constants'
+import { FLEXUSD_ADDRESS, WBCH_ADDRESS } from '../constants'
 
 import { ChainId } from '../enums'
 import { Token } from '.'
@@ -39,7 +39,7 @@ import { computeConstantProductPoolAddress } from '../functions/computeConstantP
 describe('computePoolAddress', () => {
   it('should correctly compute the pool address 2', () => {
     const tokenA = new Token(ChainId.SMARTBCH, FLEXUSD_ADDRESS[ChainId.SMARTBCH], 18, 'flexUSD', 'FlexUSD')
-    const tokenB = new Token(ChainId.SMARTBCH, WETH9_ADDRESS[ChainId.SMARTBCH], 18, 'BCH', 'Bitcoin Cash')
+    const tokenB = new Token(ChainId.SMARTBCH, WBCH_ADDRESS[ChainId.SMARTBCH], 18, 'BCH', 'Bitcoin Cash')
 
     expect(tokenA.address).toEqual('0x7b2B3C5308ab5b2a1d9a94d20D35CCDf61e05b72')
     expect(tokenB.address).toEqual('0x0000000000000000000000000000000000002711')
@@ -76,7 +76,7 @@ describe('computePoolAddress', () => {
 //         () =>
 //           new ConstantProductPool(
 //             CurrencyAmount.fromRawAmount(USDC, '100'),
-//             CurrencyAmount.fromRawAmount(WETH9[3], '100')
+//             CurrencyAmount.fromRawAmount(WBCH[3], '100')
 //           )
 //       ).toThrow('CHAIN_IDS')
 //     })
@@ -174,7 +174,7 @@ describe('computePoolAddress', () => {
 //     })
 
 //     it('throws if invalid token', () => {
-//       expect(() => pair.priceOf(WETH9[10000])).toThrow('TOKEN')
+//       expect(() => pair.priceOf(WBCH[10000])).toThrow('TOKEN')
 //     })
 //   })
 
@@ -199,7 +199,7 @@ describe('computePoolAddress', () => {
 //         new ConstantProductPool(
 //           CurrencyAmount.fromRawAmount(DAI, '101'),
 //           CurrencyAmount.fromRawAmount(USDC, '100')
-//         ).reserveOf(WETH9[10000])
+//         ).reserveOf(WBCH[10000])
 //       ).toThrow('TOKEN')
 //     })
 //   })
@@ -233,7 +233,7 @@ describe('computePoolAddress', () => {
 //       new ConstantProductPool(
 //         CurrencyAmount.fromRawAmount(USDC, '100'),
 //         CurrencyAmount.fromRawAmount(DAI, '100')
-//       ).involvesToken(WETH9[10000])
+//       ).involvesToken(WBCH[10000])
 //     ).toEqual(false)
 //   })
 //   describe('miscellaneous', () => {
