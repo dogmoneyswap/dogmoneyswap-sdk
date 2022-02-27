@@ -59,7 +59,10 @@ export const MASTERCHEF_V2_ADDRESS: AddressMap = {
   [ChainId.SMARTBCH_AMBER]: '',
 }
 
-export const ENS_REGISTRAR_ADDRESS: AddressMap = {}
+export const ENS_REGISTRAR_ADDRESS: AddressMap = {
+  [ChainId.SMARTBCH]: '',
+  [ChainId.SMARTBCH_AMBER]: '0x0acaBb80b45e490e11c3b0513Ba0ad6bC6BF0A6A',
+}
 
 export const MULTICALL2_ADDRESS: AddressMap = {
   [ChainId.SMARTBCH]: '0x3718e9C405D0bC779870355C34fb5624196A1cAA',
@@ -67,3 +70,8 @@ export const MULTICALL2_ADDRESS: AddressMap = {
 }
 
 export const BORING_HELPER_ADDRESS: AddressMap = {}
+
+export const SABLIER_ADDRESS: AddressMap = {
+  [ChainId.SMARTBCH]: '0x5eB85d9D7dc2F2C70F4C13b4Ba9Ed21d65141037',
+  [ChainId.SMARTBCH_AMBER]: '0xeE85373F26E5380Fbd71FB7295BD68fdd0818887',
+}
