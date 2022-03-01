@@ -60,8 +60,8 @@ export const MASTERCHEF_V2_ADDRESS: AddressMap = {
 }
 
 export const ENS_REGISTRAR_ADDRESS: AddressMap = {
-  [ChainId.SMARTBCH]: '',
-  [ChainId.SMARTBCH_AMBER]: '0x0acaBb80b45e490e11c3b0513Ba0ad6bC6BF0A6A',
+  [ChainId.SMARTBCH]: '0x3596f09d70B454049Ce11390A3eeBfBf6a9e3945',
+  [ChainId.SMARTBCH_AMBER]: '0x2Ced35ee5cB0596D40D51cec8fdd12e1057b5Db7',
 }
 
 export const MULTICALL2_ADDRESS: AddressMap = {
