@@ -93,4 +93,3 @@ export const TWAP_0_ORACLE_ADDRESS: AddressMap = {
 export const TWAP_1_ORACLE_ADDRESS: AddressMap = {
   [ChainId.SMARTBCH_AMBER]: "0x994BD855653ACCA620f3494ffA3D3696ccdCD5E4"
 }
-
