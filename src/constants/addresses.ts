@@ -3,7 +3,8 @@ import { ChainId } from '../enums'
 
 export const FLEXUSD_ADDRESS: AddressMap = {
   [ChainId.SMARTBCH]: '0x7b2B3C5308ab5b2a1d9a94d20D35CCDf61e05b72',
-  [ChainId.SMARTBCH_AMBER]: '0xFed990d491D8c563ce3d636D7536d7F9a3E2De12'
+  // [ChainId.SMARTBCH_AMBER]: '0xFed990d491D8c563ce3d636D7536d7F9a3E2De12'
+  [ChainId.SMARTBCH_AMBER]: '0xD0E6466293c6CdA8CaA96A57683909383c01411D' // mock
 }
 
 export const FACTORY_ADDRESS: AddressMap = {
