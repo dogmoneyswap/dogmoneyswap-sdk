@@ -1,4 +1,5 @@
 export enum ChainId {
   SMARTBCH = 10000,
-  SMARTBCH_AMBER = 10001
+  SMARTBCH_AMBER = 10001,
+  DOGECHAIN = 2000
 }

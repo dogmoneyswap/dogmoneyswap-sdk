@@ -1,17 +1,17 @@
 {
-  "name": "@mistswapdex/sdk",
+  "name": "@dogmoneyswap/sdk",
   "license": "MIT",
-  "version": "0.0.19",
-  "description": "🛠 An SDK for building applications on top of MISTswap.",
+  "version": "0.0.01",
+  "description": "🛠 An SDK for building applications on top of DOGMONEY.",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "files": [
     "dist"
   ],
-  "repository": "https://github.com/mistswapdex/mistswap-sdk",
+  "repository": "https://github.com/dogmoneyswap/dogmoneyswap-sdk",
   "keywords": [
-    "mistswap",
-    "bitcoin-cash",
+    "dogmoneyswap",
+    "doge",
     "sdk"
   ],
   "module": "dist/sdk.esm.js",

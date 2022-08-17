@@ -11,10 +11,12 @@ export const FLEXUSD: TokenMap = {
 
 export const WBCH: TokenMap = {
   [ChainId.SMARTBCH]: new Token(ChainId.SMARTBCH, WBCH_ADDRESS[ChainId.SMARTBCH], 18, 'WBCH', 'Wrapped BCH'),
-  [ChainId.SMARTBCH_AMBER]: new Token(ChainId.SMARTBCH_AMBER, WBCH_ADDRESS[ChainId.SMARTBCH_AMBER], 18, 'WBCH', 'Wrapped BCH')
+  [ChainId.SMARTBCH_AMBER]: new Token(ChainId.SMARTBCH_AMBER, WBCH_ADDRESS[ChainId.SMARTBCH_AMBER], 18, 'WBCH', 'Wrapped BCH'),
+  [ChainId.DOGECHAIN]: new Token(ChainId.DOGECHAIN, WBCH_ADDRESS[ChainId.DOGECHAIN], 18, 'WWDOGE', 'Wrapped Wrapped DOGE'),
 }
 
 export const WNATIVE: TokenMap = {
   [ChainId.SMARTBCH]: WBCH[ChainId.SMARTBCH],
-  [ChainId.SMARTBCH_AMBER]: WBCH[ChainId.SMARTBCH_AMBER]
+  [ChainId.SMARTBCH_AMBER]: WBCH[ChainId.SMARTBCH_AMBER],
+  [ChainId.DOGECHAIN]: WBCH[ChainId.DOGECHAIN],
 }

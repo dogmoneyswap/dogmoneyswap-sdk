@@ -6,7 +6,7 @@ import invariant from 'tiny-invariant'
 
 export class SmartBCH extends NativeCurrency {
   protected constructor(chainId: number) {
-    super(chainId, 18, 'BCH', 'BCH')
+    super(chainId, 18, 'DOGE', 'DOGE')
   }
 
   public get wrapped(): Token {
